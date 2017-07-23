@@ -3,9 +3,12 @@ use strict;
 use warnings;
 
 package RDF::LinkedData::RWHypermedia;
+use Moo;
+
+extends 'RDF::LinkedData';
 
 our $AUTHORITY = 'cpan:KJETILK';
-our $VERSION   = '0.001';
+our $VERSION   = '0.001_01';
 
 1;
 
