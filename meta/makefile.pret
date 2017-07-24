@@ -4,6 +4,9 @@
 
 `RDF-LinkedData-RWHypermedia`
 	:test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
+        :runtime-requirement    [ :on "Moo"^^:CpanId ];
+        :runtime-requirement    [ :on "RDF::LinkedData"^^:CpanId ];
+        :runtime-requirement    [ :on "RDF::ACL"^^:CpanId ];
 	:develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
 	.
 
