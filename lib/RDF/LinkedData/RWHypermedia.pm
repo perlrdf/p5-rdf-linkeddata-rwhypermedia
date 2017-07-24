@@ -29,31 +29,34 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 
 =cut
 
-around 'BUILD' => {
+# around 'BUILD' => {
 
- 	if ($self->has_acl_config) {
-		$self->log->debug('ACL config found with parameters: ' . Dumper($self->acl_config) );
+#  	if ($self->has_acl_config) {
+# 		$self->log->debug('ACL config found with parameters: ' . Dumper($self->acl_config) );
 
-		unless (can_load( modules => { 'RDF::ACL' => 0.100 })) {
-			croak "RDF::ACL not installed. Please install or remove its configuration.";
-		}
+# 		unless (can_load( modules => { 'RDF::ACL' => 0.100 })) {
+# 			croak "RDF::ACL not installed. Please install or remove its configuration.";
+# 		}
 
-		$self->acl;
- 	} else {
-		$self->log->info('No ACL config found');
-	}
-};
+# 		$self->acl;
+#  	} else {
+# 		$self->log->info('No ACL config found');
+# 	}
+# };
 
-#	warn Dumper($self->acl_config);
-has acl => (is => 'ro', isa => InstanceOf['RDF::ACL'], builder => '_build_acl', lazy => 1,
-				handles => { check_authz => 'check' });
+# #	warn Dumper($self->acl_config);
+# has acl => (is => 'ro', 
+# 				isa => InstanceOf['RDF::ACL'], 
+# 				builder => '_build_acl', 
+# 				lazy => 1,
+# 				handles => { check_authz => 'check' });
 
-sub _build_acl {
-	my $self = shift;
-	return RDF::ACL->new($self->acl_model);
-}
+# sub _build_acl {
+# 	my $self = shift;
+# 	return RDF::ACL->new($self->acl_model);
+# }
 
-has acl_config => (is => 'rw', isa=>Maybe[HashRef], predicate => 'has_acl_config');
+# has acl_config => (is => 'rw', isa=>HashRef, predicate => 'has_acl_config');
 
 
 has user => ( is => 'ro', isa => Str, lazy => 1, builder => '_build_user', predicate => 'is_logged_in');
@@ -73,9 +76,9 @@ around 'response' => {
 		$self->log->debug('No user is logged in');
 	}
 
-			if($type eq 'data' && $self->is_logged_in) {
-				$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
-			}
+			# if($type eq 'data' && $self->is_logged_in) {
+			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
+			# }
 
 };
 
