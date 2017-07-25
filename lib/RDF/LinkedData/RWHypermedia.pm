@@ -4,6 +4,7 @@ use warnings;
 
 package RDF::LinkedData::RWHypermedia;
 use Moo;
+use Types::Standard qw(Str);
 
 extends 'RDF::LinkedData';
 
@@ -34,20 +35,32 @@ around 'response' => sub {
 	my $orig = shift;
 	my $self = shift;
 
-#	$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
+	my $headers_in = $self->request->headers;
+	$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
 
-	$self->log->warn("OMG");
-	# if ($self->is_logged_in) {
-	# 	$self->log->debug('Logged in as: ' . $self->user);
-	# } else {
-	# 	$self->log->debug('No user is logged in');
-	# }
+
+	if ($self->is_logged_in) {
+		$self->log->debug('Logged in as: ' . $self->user);
+	} else {
+		$self->log->debug('No user is logged in');
+	}
 
 			# if($type eq 'data' && $self->is_logged_in) {
 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
 			# }
 	return $orig->($self, @_);
 };
+
+
+has user => ( is => 'ro', isa => Str, lazy => 1, 
+				  builder => '_build_user', 
+				  predicate => 'is_logged_in');
+
+sub _build_user {
+	my $self = shift;
+	my $uname = $self->request->user;
+	return "urn:X-basicauth:$uname" if ($uname);
+}
 
 
 
