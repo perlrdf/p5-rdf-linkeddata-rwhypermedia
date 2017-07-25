@@ -32,5 +32,17 @@ my $ld = RDF::LinkedData::RWHypermedia->new(model => $model,
 														  write_enabled => 1);
 
 isa_ok($ld, 'RDF::LinkedData');
+isa_ok($ld, 'RDF::LinkedData::RWHypermedia');
+cmp_ok($ld->count, '>', 0, "There are triples in the model");
+
+{
+    note "Get /foo";
+    $ld->request(Plack::Request->new({}));
+    my $response = $ld->response($base_uri . '/foo');
+    isa_ok($response, 'Plack::Response');
+    is($response->status, 303, "Returns 303");
+    like($response->header('Location'), qr|/foo/data$|, "Location is OK");
+}
+
 
 done_testing;
