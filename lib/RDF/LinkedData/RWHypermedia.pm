@@ -34,7 +34,8 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 around 'response' => sub {
 	my $orig = shift;
 	my $self = shift;
-
+	my $origresponse = $orig->($self, @_);
+	warn Data::Dumper::Dumper($origresponse);
 	my $headers_in = $self->request->headers;
 	$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
 
@@ -43,6 +44,11 @@ around 'response' => sub {
 		$self->log->debug('Logged in as: ' . $self->user);
 	} else {
 		$self->log->debug('No user is logged in');
+		# TODO: check authz
+		if ($self->type eq 'data' || $self->type eq 'page') {
+			# We tell the user where they may authenticate
+			
+		}
 	}
 
 			# if($type eq 'data' && $self->is_logged_in) {
