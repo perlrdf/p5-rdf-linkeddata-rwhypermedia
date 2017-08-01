@@ -31,31 +31,31 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 
 
 
-around 'response' => sub {
-	my $orig = shift;
-	my $self = shift;
-	my $origresponse = $orig->($self, @_);
-	warn Data::Dumper::Dumper($origresponse);
-	my $headers_in = $self->request->headers;
-	$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
+# around 'response' => sub {
+# 	my $orig = shift;
+# 	my $self = shift;
+# 	my $origresponse = $orig->($self, @_);
+# 	warn Data::Dumper::Dumper($origresponse);
+# 	my $headers_in = $self->request->headers;
+# 	$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
 
 
-	if ($self->is_logged_in) {
-		$self->log->debug('Logged in as: ' . $self->user);
-	} else {
-		$self->log->debug('No user is logged in');
-		# TODO: check authz
-		if ($self->type eq 'data' || $self->type eq 'page') {
-			# We tell the user where they may authenticate
+# 	if ($self->is_logged_in) {
+# 		$self->log->debug('Logged in as: ' . $self->user);
+# 	} else {
+# 		$self->log->debug('No user is logged in');
+# 		# TODO: check authz
+# 		if ($self->type eq 'data' || $self->type eq 'page') {
+# 			# We tell the user where they may authenticate
 			
-		}
-	}
+# 		}
+# 	}
 
-			# if($type eq 'data' && $self->is_logged_in) {
-			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
-			# }
-	return $orig->($self, @_);
-};
+# 			# if($type eq 'data' && $self->is_logged_in) {
+# 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
+# 			# }
+# 	return $orig->($self, @_);
+# };
 
 
 has user => ( is => 'ro', isa => Str, lazy => 1, 
@@ -68,6 +68,22 @@ sub _build_user {
 	return "urn:X-basicauth:$uname" if ($uname);
 }
 
+sub add_rw_controls {
+	my $self = shift;
+	my $hmmodel = shift;
+	my $data_iri = shift;
+	my $exprefix = 'http://example.org/hypermedia#';
+	if ($self->is_logged_in) {
+		$hmmodel->add_statement($data_iri,
+										iri($exprefix . 'canBe'),
+										iri($exprefix . 'mergedInto'));
+	} else {
+		$hmmodel->add_statement($data_iri,
+										iri($exprefix .  'toEditAuthAt'),
+										iri($self->base_uri . '/auth'));
+	}
+}
+		
 
 
 =head1 BUGS
