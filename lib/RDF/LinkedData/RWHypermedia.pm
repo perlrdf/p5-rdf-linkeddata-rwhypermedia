@@ -5,6 +5,7 @@ use warnings;
 package RDF::LinkedData::RWHypermedia;
 use Moo;
 use Types::Standard qw(Str);
+use RDF::Trine qw(iri statement);
 
 extends 'RDF::LinkedData';
 
@@ -73,14 +74,15 @@ sub add_rw_controls {
 	my $hmmodel = shift;
 	my $data_iri = shift;
 	my $exprefix = 'http://example.org/hypermedia#';
+
 	if ($self->is_logged_in) {
-		$hmmodel->add_statement($data_iri,
-										iri($exprefix . 'canBe'),
-										iri($exprefix . 'mergedInto'));
+		$hmmodel->add_statement(statement($data_iri,
+													 iri($exprefix . 'canBe'),
+													 iri($exprefix . 'mergedInto')));
 	} else {
-		$hmmodel->add_statement($data_iri,
-										iri($exprefix .  'toEditAuthAt'),
-										iri($self->base_uri . '/auth'));
+		$hmmodel->add_statement(statement($data_iri,
+													 iri($exprefix .  'toEditAuthAt'),
+													 iri($self->base_uri . '/auth')));
 	}
 }
 		
