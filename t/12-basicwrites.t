@@ -31,7 +31,8 @@ ok($model, "We have a model");
 
 my $ld = RDF::LinkedData::RWHypermedia->new(model => $model, 
 														  base_uri=>$base_uri, 
-														  write_enabled => 1);
+														  writes_enabled => 1,
+														  hypermedia => 1);
 
 isa_ok($ld, 'RDF::LinkedData');
 isa_ok($ld, 'RDF::LinkedData::RWHypermedia');
@@ -52,7 +53,7 @@ subtest "Get /foo/data" => sub {
     isa_ok($response, 'Plack::Response');
     is($response->status, 200, "Returns 200");
     my $model = RDF::Trine::Model->temporary_model;
-    my $parser = RDF::Trine::Parser->new( 'rdfxml' );
+    my $parser = RDF::Trine::Parser->new( 'turtle' );
     $parser->parse_into_model( $base_uri, $response->body, $model );
     has_literal('This is a test', 'en', undef, $model, "Test phrase in content");
 	 has_subject($base_uri . '/foo/data', $model, 'Data URI in content');
