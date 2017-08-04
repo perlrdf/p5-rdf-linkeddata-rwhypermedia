@@ -65,6 +65,11 @@ subtest "Get /foo/data" => sub {
 	 ok($authurl->equal(iri($base_uri . '/auth')), 'Authentication URL is correct');
 };
 
+subtest "Get authurl" => sub {
+	my $response = $ld->response($base_uri . '/auth');
+	isa_ok($response, 'Plack::Response');
+	is($response->status, 401, "Returns 401");
+};
 
 
 done_testing;
