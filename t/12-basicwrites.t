@@ -8,6 +8,7 @@ use Test::More;
 use Test::RDF;
 use Log::Any::Adapter;
 use Module::Load::Conditional qw[can_load];
+use RDF::Trine qw(iri);
 
 Log::Any::Adapter->set($ENV{LOG_ADAPTER} || 'Stderr') if $ENV{TEST_VERBOSE};
 
@@ -46,6 +47,7 @@ subtest "Get /foo" => sub {
     like($response->header('Location'), qr|/foo/data$|, "Location is OK");
 };
 
+my $authurl;
 
 subtest "Get /foo/data" => sub {
     $ld->type('data');
@@ -58,6 +60,9 @@ subtest "Get /foo/data" => sub {
     has_literal('This is a test', 'en', undef, $model, "Test phrase in content");
 	 has_subject($base_uri . '/foo/data', $model, 'Data URI in content');
 	 has_predicate($exprefix . 'toEditAuthAt', $model, 'Auth predicate in content');
+	 $authurl = ($model->objects_for_predicate_list ( iri($base_uri . '/foo/data'), iri($exprefix . 'toEditAuthAt')));
+	 isa_ok($authurl, 'RDF::Trine::Node::Resource', 'Authentication URL is a resource');
+	 ok($authurl->equal(iri($base_uri . '/auth')), 'Authentication URL is correct');
 };
 
 
