@@ -71,5 +71,11 @@ subtest "Get authurl" => sub {
 	is($response->status, 401, "Returns 401");
 };
 
+subtest "Get authurl with testuser" => sub {
+	$ld->request->user('testuser');
+	my $response = $ld->response($base_uri . '/auth');
+	isa_ok($response, 'Plack::Response');
+	is($response->status, 200, "Returns 200");
+};
 
 done_testing;
