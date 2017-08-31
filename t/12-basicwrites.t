@@ -54,13 +54,12 @@ subtest "Get /foo/data" => sub {
     my $response = $ld->response($base_uri . '/foo');
     isa_ok($response, 'Plack::Response');
     is($response->status, 200, "Returns 200");
-    my $model = RDF::Trine::Model->temporary_model;
-    my $parser = RDF::Trine::Parser->new( 'turtle' );
-    $parser->parse_into_model( $base_uri, $response->body, $model );
-    has_literal('This is a test', 'en', undef, $model, "Test phrase in content");
-	 has_subject($base_uri . '/foo/data', $model, 'Data URI in content');
-	 has_predicate($exprefix . 'toEditGoTo', $model, 'Edit predicate in content');
-	 $controlurl = ($model->objects_for_predicate_list ( iri($base_uri . '/foo/data'), iri($exprefix . 'toEditGoTo')));
+    my $retmodel = RDF::Trine::Model->temporary_model;
+    $parser->parse_into_model( $base_uri, $response->body, $retmodel );
+    has_literal('This is a test', 'en', undef, $retmodel, "Test phrase in content");
+	 has_subject($base_uri . '/foo/data', $retmodel, 'Data URI in content');
+	 has_predicate($exprefix . 'toEditGoTo', $retmodel, 'Edit predicate in content');
+	 $controlurl = ($retmodel->objects_for_predicate_list ( iri($base_uri . '/foo/data'), iri($exprefix . 'toEditGoTo')));
 	 isa_ok($controlurl, 'RDF::Trine::Node::Resource', 'Authentication URL is a resource');
 	 ok($controlurl->equal(iri($base_uri . '/foo/controls')), 'Authentication URL is correct');
 };
@@ -77,6 +76,7 @@ subtest "Get controlurl with testuser" => sub {
 	my $response = $ld->response($controlurl);
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
+	
 };
 
 done_testing;
