@@ -76,7 +76,20 @@ subtest "Get controlurl with testuser" => sub {
 	my $response = $ld->response($controlurl);
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
-	
+	my $retmodel = RDF::Trine::Model->temporary_model;
+	is_valid_rdf($response->body, 'turtle', 'Response body is RDF');
+	$parser->parse_into_model( $base_uri, $response->body, $retmodel );
+	has_subject($base_uri . '/foo/data', $retmodel, 'Data URI in content');
+	has_type($exprefix . 'AffordancesDocument', 'Class URI in content');
+	has_predicate($exprefix . 'canBe', 'Class URI in content');
+	pattern_target($retmodel);
+	pattern_ok(
+				  statement(
+								iri($base_uri . '/foo/data'),
+								iri($exprefix . 'canBe'),
+								iri($exprefix . 'mergedInto')),
+				  'Write instructions are OK');
+  
 };
 
 done_testing;
