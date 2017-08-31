@@ -59,21 +59,22 @@ subtest "Get /foo/data" => sub {
     $parser->parse_into_model( $base_uri, $response->body, $model );
     has_literal('This is a test', 'en', undef, $model, "Test phrase in content");
 	 has_subject($base_uri . '/foo/data', $model, 'Data URI in content');
-	 has_predicate($exprefix . 'toEditAuthAt', $model, 'Auth predicate in content');
-	 $authurl = ($model->objects_for_predicate_list ( iri($base_uri . '/foo/data'), iri($exprefix . 'toEditAuthAt')));
+	 has_predicate($exprefix . 'toEditGoTo', $model, 'Edit predicate in content');
+	 $authurl = ($model->objects_for_predicate_list ( iri($base_uri . '/foo/data'), iri($exprefix . 'toEditGoTo')));
 	 isa_ok($authurl, 'RDF::Trine::Node::Resource', 'Authentication URL is a resource');
-	 ok($authurl->equal(iri($base_uri . '/auth')), 'Authentication URL is correct');
+	 ok($authurl->equal(iri($base_uri . '/foo/controls')), 'Authentication URL is correct');
 };
 
+
 subtest "Get authurl" => sub {
-	my $response = $ld->response($base_uri . '/auth');
+	my $response = $ld->response($base_uri . '/foo/controls');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 401, "Returns 401");
 };
 
 subtest "Get authurl with testuser" => sub {
 	$ld->request->user('testuser');
-	my $response = $ld->response($base_uri . '/auth');
+	my $response = $ld->response($base_uri . '/foo/controls');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
 };
