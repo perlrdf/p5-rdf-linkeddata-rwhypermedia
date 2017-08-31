@@ -69,23 +69,16 @@ sub _build_user {
 	return "urn:X-basicauth:$uname" if ($uname);
 }
 
-sub add_rw_controls {
+sub add_rw_pointer {
 	my $self = shift;
 	my $hmmodel = shift;
-	my $data_iri = shift;
+	my $uri = shift;
 	my $exprefix = 'http://example.org/hypermedia#';
-
-	if ($self->is_logged_in) {
-		$hmmodel->add_statement(statement($data_iri,
-													 iri($exprefix . 'canBe'),
-													 iri($exprefix . 'mergedInto')));
-	} else {
-		$hmmodel->add_statement(statement($data_iri,
-													 iri($exprefix .  'toEditAuthAt'),
-													 iri($self->base_uri . '/auth')));
-	}
+	$hmmodel->add_statement(statement(iri($uri->uri_value . '/data'),
+												 iri($exprefix .  'toEditGoTo'),
+												 iri($uri->uri_value . '/controls')));
 }
-		
+
 
 
 =head1 BUGS
