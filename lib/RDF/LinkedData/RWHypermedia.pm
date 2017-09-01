@@ -32,31 +32,48 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 
 
 
-# around 'response' => sub {
-# 	my $orig = shift;
-# 	my $self = shift;
-# 	my $origresponse = $orig->($self, @_);
-# 	warn Data::Dumper::Dumper($origresponse);
-# 	my $headers_in = $self->request->headers;
-# 	$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
+around 'response' => sub {
+ 	my $orig = shift;
+ 	my $self = shift;
+
+	if ($self->writes_enabled) {
+		my $rwmodel = RDF::Trine::Model->temporary_model;
+		my $headers_in = $self->request->headers;
+		$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
+		
+		my $node = $self->my_node;
+		my $data_iri = iri($node->uri_value . '/data');
+		my $controls_iri = iri($node->uri_value . '/controls');
+		$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
+		my $hm = $self->namespaces->hm;
+
+		if ($self->is_logged_in) {
+			$self->log->debug('Logged in as: ' . $self->user);
+			# TODO: Check ACL
+			if ($self->type eq 'controls') {
+				$rwmodel->add_statement(statement($controls_iri,
+												$self->namespaces->rdf->type,
+												$hm->AffordancesDocument));
+												
 
 
-# 	if ($self->is_logged_in) {
-# 		$self->log->debug('Logged in as: ' . $self->user);
-# 	} else {
-# 		$self->log->debug('No user is logged in');
-# 		# TODO: check authz
-# 		if ($self->type eq 'data' || $self->type eq 'page') {
-# 			# We tell the user where they may authenticate
-			
-# 		}
-# 	}
-
-# 			# if($type eq 'data' && $self->is_logged_in) {
-# 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
-# 			# }
-# 	return $orig->($self, @_);
-# };
+			} else {
+				 $self->log->debug('No user is logged in');
+				 # 		# TODO: check authz
+				 # 		if ($self->type eq 'data' || $self->type eq 'page') {
+				 # 			# We tell the user where they may authenticate
+				 
+				 # 		}
+				 # 	}
+				 
+				 # 			# if($type eq 'data' && $self->is_logged_in) {
+				 # 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
+				 # 			# }
+			 }
+		}
+	}
+	return $orig->($self, @_);
+};
 
 
 has user => ( is => 'ro', isa => Str, lazy => 1, 
