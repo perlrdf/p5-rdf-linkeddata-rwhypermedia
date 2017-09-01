@@ -88,6 +88,10 @@ subtest "Get controlurl with testuser" => sub {
 								iri($base_uri . '/foo/data'),
 								iri($exprefix . 'canBe'),
 								iri($exprefix . 'mergedInto')),
+				  statement(
+								iri($base_uri . '/foo/control'),
+								iri($exprefix . 'for'),
+								iri($base_uri . '/foo/data')),
 				  'Write instructions are OK');
   
 };
