@@ -68,7 +68,7 @@ TODO: {
 	local $TODO = 'Challenge not implemented';
 subtest "Get controlurl" => sub {
 	$ld->type('controls');
-	my $response = $ld->response($controlurl);
+	my $response = $ld->response($base_uri . '/foo');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 401, "Returns 401");
 };
@@ -80,7 +80,7 @@ TODO: {
 subtest "Get controlurl with testuser" => sub {
 	$ld->request->user('testuser');
 	$ld->type('controls');
-	my $response = $ld->response($controlurl);
+	my $response = $ld->response($base_uri . '/foo');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
 	my $retmodel = RDF::Trine::Model->temporary_model;
