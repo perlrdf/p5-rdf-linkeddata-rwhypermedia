@@ -32,47 +32,63 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 
 
 
-around 'response' => sub {
+around '_content' => sub {
  	my $orig = shift;
  	my $self = shift;
-
-	if ($self->writes_enabled) {
-		my $rwmodel = RDF::Trine::Model->temporary_model;
-		my $headers_in = $self->request->headers;
-		$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
-		
-		my $node = $self->my_node;
-		my $data_iri = iri($node->uri_value . '/data');
-		my $controls_iri = iri($node->uri_value . '/controls');
-		$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
-		my $hm = $self->namespaces->hm;
-
-		if ($self->is_logged_in) {
-			$self->log->debug('Logged in as: ' . $self->user);
-			# TODO: Check ACL
-			if ($self->type eq 'controls') {
-				$rwmodel->add_statement(statement($controls_iri,
-												$self->namespaces->rdf->type,
-												$hm->AffordancesDocument));
-												
-
-
-			} else {
-				 $self->log->debug('No user is logged in');
-				 # 		# TODO: check authz
-				 # 		if ($self->type eq 'data' || $self->type eq 'page') {
-				 # 			# We tell the user where they may authenticate
-				 
-				 # 		}
-				 # 	}
-				 
-				 # 			# if($type eq 'data' && $self->is_logged_in) {
-				 # 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
-				 # 			# }
-			 }
+	my @params = @_;
+	my $node = shift;
+	my $type = shift;
+	
+	if ($type eq 'controls') {
+		$self->log->debug('We generate a response for RW hypermedia controls');
+		if ($self->writes_enabled) {
+			my %output;
+			my $rwmodel = RDF::Trine::Model->temporary_model;
+			my $headers_in = $self->request->headers;
+			$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
+			
+			my $node = $self->my_node;
+			my $data_iri = iri($node->uri_value . '/data');
+			my $controls_iri = iri($node->uri_value . '/controls');
+			$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
+			my $hm = $self->namespaces->hm;
+			
+			if ($self->is_logged_in) {
+				$self->log->debug('Logged in as: ' . $self->user);
+				# TODO: Check ACL
+				if ($self->type eq 'controls') {
+					$rwmodel->add_statement(statement($controls_iri,
+																 $self->namespaces->rdf->type,
+																 $hm->AffordancesDocument));
+					
+					
+					
+				} else {
+					$self->log->debug('No user is logged in');
+					# 		# TODO: check authz
+					# 		if ($self->type eq 'data' || $self->type eq 'page') {
+					# 			# We tell the user where they may authenticate
+					
+					# 		}
+					# 	}
+					
+					# 			# if($type eq 'data' && $self->is_logged_in) {
+					# 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
+					# 			# }
+				}
+			}
+			my ($ctype, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $headers_in,
+																				 base => $self->base_uri,
+																				 namespaces => $self->_namespace_hashref);
+			$output{content_type} = $ctype;
+			$output{body} = $s->serialize_model_to_string ( $rwmodel );
+			$self->log->trace("Message body is $output{body}" );
+			return \%output
+		} else {
+			$self->log->warn('Controls were on, but not writes. Strange situation');
 		}
 	}
-	return $orig->($self, @_);
+	return $orig->($self, @params);
 };
 
 
