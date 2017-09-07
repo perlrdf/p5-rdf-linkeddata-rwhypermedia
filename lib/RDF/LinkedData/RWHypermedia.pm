@@ -47,7 +47,6 @@ around '_content' => sub {
 			my $headers_in = $self->request->headers;
 			$self->log->trace('Full headers we respond to: ' . $headers_in->as_string);
 			
-			my $node = $self->my_node;
 			my $data_iri = iri($node->uri_value . '/data');
 			my $controls_iri = iri($node->uri_value . '/controls');
 			$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
