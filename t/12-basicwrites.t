@@ -64,15 +64,22 @@ subtest "Get /foo/data" => sub {
 	 ok($controlurl->equal(iri($base_uri . '/foo/controls')), 'Authentication URL is correct');
 };
 
-
+TODO: {
+	local $TODO = 'Challenge not implemented';
 subtest "Get controlurl" => sub {
+	$ld->type('controls');
 	my $response = $ld->response($controlurl);
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 401, "Returns 401");
 };
+};
+
+TODO: {
+	local $TODO = 'Logged in user not implemented';
 
 subtest "Get controlurl with testuser" => sub {
 	$ld->request->user('testuser');
+	$ld->type('controls');
 	my $response = $ld->response($controlurl);
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
@@ -94,6 +101,7 @@ subtest "Get controlurl with testuser" => sub {
 								iri($base_uri . '/foo/data')),
 				  'Write instructions are OK');
   
+};
 };
 
 done_testing;
