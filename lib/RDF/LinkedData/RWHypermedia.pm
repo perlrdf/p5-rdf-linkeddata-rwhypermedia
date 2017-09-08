@@ -6,6 +6,7 @@ package RDF::LinkedData::RWHypermedia;
 use Moo;
 use Types::Standard qw(Str);
 use RDF::Trine qw(iri statement);
+use Data::Dumper;
 
 extends 'RDF::LinkedData';
 
@@ -50,32 +51,32 @@ around '_content' => sub {
 			my $data_iri = iri($node->uri_value . '/data');
 			my $controls_iri = iri($node->uri_value . '/controls');
 			$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
+			$self->guess_namespaces('rdf', 'void');
+			$self->add_namespace_mapping(hydra => 'http://www.w3.org/ns/hydra/core#');
+			
 			my $hm = $self->namespaces->hm;
 			
 			if ($self->is_logged_in) {
-				$self->log->debug('Logged in as: ' . $self->user);
-				# TODO: Check ACL
-				if ($self->type eq 'controls') {
-					$rwmodel->add_statement(statement($controls_iri,
-																 $self->namespaces->rdf->type,
-																 $hm->AffordancesDocument));
-					
-					
-					
-				} else {
-					$self->log->debug('No user is logged in');
-					# 		# TODO: check authz
-					# 		if ($self->type eq 'data' || $self->type eq 'page') {
-					# 			# We tell the user where they may authenticate
-					
-					# 		}
-					# 	}
-					
-					# 			# if($type eq 'data' && $self->is_logged_in) {
-					# 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
-					# 			# }
-				}
+			  $self->log->debug('Logged in as: ' . $self->user);
+			  
+			  # TODO: Check ACL
+			  $rwmodel->add_statement(statement($controls_iri,
+															iri($self->namespaces->rdf->type),
+															iri($hm->AffordancesDocument)));
+			} else {
+			  $self->log->debug('No user is logged in');
+			  # 		# TODO: check authz
+			  # 		if ($self->type eq 'data' || $self->type eq 'page') {
+			  # 			# We tell the user where they may authenticate
+			  
+			  # 		}
+			  # 	}
+			  
+			  # 			# if($type eq 'data' && $self->is_logged_in) {
+			  # 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
+			  # 			# }
 			}
+			
 			my ($ctype, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $headers_in,
 																				 base => $self->base_uri,
 																				 namespaces => $self->_namespace_hashref);
@@ -91,7 +92,7 @@ around '_content' => sub {
 };
 
 
-has user => ( is => 'ro', isa => Str, lazy => 1, 
+has user => ( is => 'rw', isa => Str, lazy => 1, 
 				  builder => '_build_user', 
 				  predicate => 'is_logged_in');
 

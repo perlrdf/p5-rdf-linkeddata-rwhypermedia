@@ -78,7 +78,7 @@ TODO: {
 	local $TODO = 'Logged in user not implemented';
 
 subtest "Get controlurl with testuser" => sub {
-	$ld->request->user('testuser');
+	$ld->user('testuser');
 	$ld->type('controls');
 	my $response = $ld->response($base_uri . '/foo');
 	isa_ok($response, 'Plack::Response');
