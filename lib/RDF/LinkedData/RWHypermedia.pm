@@ -5,7 +5,7 @@ use warnings;
 package RDF::LinkedData::RWHypermedia;
 use Moo;
 use Types::Standard qw(Str);
-use RDF::Trine qw(iri statement);
+use RDF::Trine qw(iri statement literal);
 use Data::Dumper;
 
 extends 'RDF::LinkedData';
@@ -51,7 +51,7 @@ around '_content' => sub {
 			my $data_iri = iri($node->uri_value . '/data');
 			my $controls_iri = iri($node->uri_value . '/controls');
 			$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
-			$self->guess_namespaces('rdf', 'void');
+			$self->guess_namespaces('rdf', 'void', 'dct');
 			$self->add_namespace_mapping(hydra => 'http://www.w3.org/ns/hydra/core#');
 			
 			my $hm = $self->namespaces->hm;
@@ -63,6 +63,17 @@ around '_content' => sub {
 			  $rwmodel->add_statement(statement($controls_iri,
 															iri($self->namespaces->rdf->type),
 															iri($hm->AffordancesDocument)));
+			  $rwmodel->add_statement(statement($controls_iri,
+															iri($self->namespaces->dct->description),
+															literal('This document describes what you can do in terms of write operations on ' . $data_iri->uri_value, 'en')));
+			  $rwmodel->add_statement(statement($controls_iri,
+															iri($hm->for),
+															$data_iri));
+			  $rwmodel->add_statement(statement($data_iri,
+															iri($hm->canBe),
+															iri($hm->mergedInto)));
+
+
 			} else {
 			  $self->log->debug('No user is logged in');
 			  # 		# TODO: check authz
