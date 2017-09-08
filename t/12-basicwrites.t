@@ -86,6 +86,7 @@ subtest "Get controlurl with testuser" => sub {
 	my $retmodel = RDF::Trine::Model->temporary_model;
 	is_valid_rdf($response->body, 'turtle', 'Response body is RDF');
 	$parser->parse_into_model( $base_uri, $response->body, $retmodel );
+	has_subject($controlurl->uri_value, $retmodel, 'Actual controls URI in content');
 	has_subject($base_uri . '/foo/data', $retmodel, 'Data URI in content');
 	has_type($exprefix . 'AffordancesDocument', $retmodel, 'Class URI in content');
 	has_predicate($exprefix . 'canBe', $retmodel, 'canBe predicate in content');
@@ -96,7 +97,7 @@ subtest "Get controlurl with testuser" => sub {
 								iri($exprefix . 'canBe'),
 								iri($exprefix . 'mergedInto')),
 				  statement(
-								iri($base_uri . '/foo/control'),
+								iri($base_uri . '/foo/controls'),
 								iri($exprefix . 'for'),
 								iri($base_uri . '/foo/data')),
 				  'Write instructions are OK');
