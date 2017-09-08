@@ -8,7 +8,7 @@ use Test::More;
 use Test::RDF;
 use Log::Any::Adapter;
 use Module::Load::Conditional qw[can_load];
-use RDF::Trine qw(iri);
+use RDF::Trine qw(iri statement);
 
 Log::Any::Adapter->set($ENV{LOG_ADAPTER} || 'Stderr') if $ENV{TEST_VERBOSE};
 
@@ -87,8 +87,8 @@ subtest "Get controlurl with testuser" => sub {
 	is_valid_rdf($response->body, 'turtle', 'Response body is RDF');
 	$parser->parse_into_model( $base_uri, $response->body, $retmodel );
 	has_subject($base_uri . '/foo/data', $retmodel, 'Data URI in content');
-	has_type($exprefix . 'AffordancesDocument', 'Class URI in content');
-	has_predicate($exprefix . 'canBe', 'Class URI in content');
+	has_type($exprefix . 'AffordancesDocument', $retmodel, 'Class URI in content');
+	has_predicate($exprefix . 'canBe', $retmodel, 'canBe predicate in content');
 	pattern_target($retmodel);
 	pattern_ok(
 				  statement(
