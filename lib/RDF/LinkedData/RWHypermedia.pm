@@ -95,8 +95,7 @@ around '_content' => sub {
 			  $output{content_type} = $ctype;
 			  $output{body} = $s->serialize_model_to_string ( $rwmodel );
 			} else {
-			  $self->log->error('No user is logged in');
-			  die "Shouldn't get here";
+			  $self->log->info('No user is logged in');
 			  # 		# TODO: check authz
 			  # 		if ($self->type eq 'data' || $self->type eq 'page') {
 			  # 			# We tell the user where they may authenticate
