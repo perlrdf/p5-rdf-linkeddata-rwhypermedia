@@ -41,6 +41,7 @@ cmp_ok($ld->count, '>', 0, "There are triples in the model");
 
 subtest "Get /foo" => sub {
     $ld->request(Plack::Request->new({}));
+	 $ld->does_read_operation(1);
     my $response = $ld->response($base_uri . '/foo');
     isa_ok($response, 'Plack::Response');
     is($response->status, 303, "Returns 303");
@@ -51,6 +52,8 @@ my $controlurl;
 
 subtest "Get /foo/data" => sub {
     $ld->type('data');
+    $ld->request(Plack::Request->new({}));
+	 $ld->does_read_operation(1);
     my $response = $ld->response($base_uri . '/foo');
     isa_ok($response, 'Plack::Response');
     is($response->status, 200, "Returns 200");
@@ -67,7 +70,9 @@ subtest "Get /foo/data" => sub {
 TODO: {
 	local $TODO = 'Challenge not implemented';
 subtest "Get controlurl" => sub {
+   $ld->request(Plack::Request->new({}));
 	$ld->type('controls');
+   $ld->does_read_operation(1);
 	my $response = $ld->response($base_uri . '/foo');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 401, "Returns 401");
@@ -80,6 +85,8 @@ TODO: {
 subtest "Get controlurl with testuser" => sub {
 	$ld->user('testuser');
 	$ld->type('controls');
+	$ld->does_read_operation(1);
+   $ld->request(Plack::Request->new({}));
 	my $response = $ld->response($base_uri . '/foo');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
