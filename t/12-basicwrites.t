@@ -67,6 +67,46 @@ subtest "Get /foo/data" => sub {
 	 ok($controlurl->equal(iri($base_uri . '/foo/controls')), 'Authentication URL is correct');
 };
 
+subtest "Write /foo/controls" => sub {
+  $ld->type('controls');
+  $ld->request(Plack::Request->new({}));
+  $ld->does_read_operation(0);
+  my $response = $ld->response($base_uri . '/foo');
+  isa_ok($response, 'Plack::Response');
+  is($response->status, 405, "Returns 405");
+};
+
+subtest "Write /foo/page" => sub {
+  $ld->type('page');
+  $ld->request(Plack::Request->new({}));
+  $ld->does_read_operation(0);
+  my $response = $ld->response($base_uri . '/foo');
+  isa_ok($response, 'Plack::Response');
+  is($response->status, 405, "Returns 405");
+};
+
+subtest "Write /foo" => sub {
+  $ld->type('');
+  $ld->request(Plack::Request->new({}));
+  $ld->does_read_operation(0);
+  my $response = $ld->response($base_uri . '/foo');
+  isa_ok($response, 'Plack::Response');
+  is($response->status, 405, "Returns 405");
+};
+
+TODO: {
+	local $TODO = 'This is not present';
+subtest "Write /foo/dahut" => sub {
+  $ld->type('');
+  $ld->request(Plack::Request->new({}));
+  $ld->does_read_operation(0);
+  my $response = $ld->response($base_uri . '/foo/dahut');
+  isa_ok($response, 'Plack::Response');
+  is($response->status, 404, "Returns 404");
+};
+};
+
+
 TODO: {
 	local $TODO = 'Challenge not implemented';
 subtest "Get controlurl" => sub {
