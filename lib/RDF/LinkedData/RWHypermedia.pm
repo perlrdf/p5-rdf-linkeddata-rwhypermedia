@@ -30,7 +30,23 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 
 =cut
 
+around 'response' => sub {
+  my $orig = shift;
+  my $self = shift;
+  my @params = @_;
+  my $uri = URI->new(shift);
+  my $req = $self->request;
+  my $response = Plack::Response->new;
 
+  unless (($self->type eq 'data') || $self->does_read_operation) {
+	 $response->status(405);
+	 $response->headers->content_type('text/plain');
+	 $response->body("HTTP 405: Method not allowed.\nWrites can only be done against data information resources, not " . $self->type . ".\nTry getting ../controls\n");
+	 return $response;
+  }
+	 
+  	return $orig->($self, @params);
+};
 
 
 around '_content' => sub {
@@ -73,9 +89,14 @@ around '_content' => sub {
 															iri($hm->canBe),
 															iri($hm->mergedInto)));
 
-
+			  my ($ctype, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $headers_in,
+																					base => $self->base_uri,
+																					namespaces => $self->_namespace_hashref);
+			  $output{content_type} = $ctype;
+			  $output{body} = $s->serialize_model_to_string ( $rwmodel );
 			} else {
-			  $self->log->debug('No user is logged in');
+			  $self->log->error('No user is logged in');
+			  die "Shouldn't get here";
 			  # 		# TODO: check authz
 			  # 		if ($self->type eq 'data' || $self->type eq 'page') {
 			  # 			# We tell the user where they may authenticate
@@ -88,12 +109,8 @@ around '_content' => sub {
 			  # 			# }
 			}
 			
-			my ($ctype, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $headers_in,
-																				 base => $self->base_uri,
-																				 namespaces => $self->_namespace_hashref);
-			$output{content_type} = $ctype;
-			$output{body} = $s->serialize_model_to_string ( $rwmodel );
 			$self->log->trace("Message body is $output{body}" );
+
 			return \%output
 		} else {
 			$self->log->warn('Controls were on, but not writes. Strange situation');
