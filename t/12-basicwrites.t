@@ -94,8 +94,6 @@ subtest "Write /foo" => sub {
   is($response->status, 405, "Returns 405");
 };
 
-TODO: {
-	local $TODO = 'This is not present';
 subtest "Write /foo/dahut" => sub {
   $ld->type('');
   $ld->request(Plack::Request->new({}));
@@ -103,7 +101,6 @@ subtest "Write /foo/dahut" => sub {
   my $response = $ld->response($base_uri . '/foo/dahut');
   isa_ok($response, 'Plack::Response');
   is($response->status, 404, "Returns 404");
-};
 };
 
 

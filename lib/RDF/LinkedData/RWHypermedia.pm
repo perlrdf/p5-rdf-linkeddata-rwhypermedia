@@ -38,14 +38,40 @@ around 'response' => sub {
   my $req = $self->request;
   my $response = Plack::Response->new;
 
+  my $node = $self->my_node($uri);
+  $self->log->info("Write operation is attempted for subject node: " . $node->as_string);
+  if ($self->count($node) == 0) {
+	 $response->status(404);
+	 $response->headers->content_type('text/plain');
+	 $response->body('HTTP 404: Unknown resource');
+	 return $response;
+  }
+  
   unless (($self->type eq 'data') || $self->does_read_operation) {
 	 $response->status(405);
 	 $response->headers->content_type('text/plain');
-	 $response->body("HTTP 405: Method not allowed.\nWrites can only be done against data information resources, not " . $self->type . ".\nTry getting ../controls\n");
+	 $response->body("HTTP 405: Method not allowed.\nWrites can only be done against data information resources, not " . $self->type . ".\nTry getting ./controls\n");
 	 return $response;
   }
+  
+  if ($self->type eq 'controls') {
+	 if ($self->writes_enabled) {
+		my $node = $self->my_node($uri);
+		$self->log->info("Write operation is attempted for subject node: " . $node->as_string);
+		$response->status(201);
+		$response->headers->content_type('text/plain');
+		$response->body('OMG');
+		return $response;
+	 } else {
+		$response->status(403);
+		$response->headers->content_type('text/plain');
+		$response->body("HTTP 403: Forbidden.\nServer is configured without writes.");
+		return $response;
+	 }
+  }
 	 
-  	return $orig->($self, @params);
+	 
+  return $orig->($self, @params);
 };
 
 
@@ -95,17 +121,8 @@ around '_content' => sub {
 			  $output{content_type} = $ctype;
 			  $output{body} = $s->serialize_model_to_string ( $rwmodel );
 			} else {
-			  $self->log->info('No user is logged in');
-			  # 		# TODO: check authz
-			  # 		if ($self->type eq 'data' || $self->type eq 'page') {
-			  # 			# We tell the user where they may authenticate
-			  
-			  # 		}
-			  # 	}
-			  
-			  # 			# if($type eq 'data' && $self->is_logged_in) {
-			  # 			# 	$self->add_auth_levels($self->check_authz($self->user, $node->uri_value . '/data'));
-			  # 			# }
+			  # Shouldn't get here
+			  die 'No user is logged in, probably a bug';
 			}
 			
 			$self->log->trace("Message body is $output{body}" );
