@@ -58,10 +58,12 @@ around 'response' => sub {
 	 if ($self->writes_enabled) {
 		my $node = $self->my_node($uri);
 		$self->log->info("Write operation is attempted for subject node: " . $node->as_string);
-		$response->status(201);
-		$response->headers->content_type('text/plain');
-		$response->body('OMG');
-		return $response;
+		unless ($self->is_logged_in) {
+		  $response->status(401);
+		  $response->headers->content_type('text/plain');
+		  $response->body('HTTP 401: Authentication Required');
+		  return $response;
+		}
 	 } else {
 		$response->status(403);
 		$response->headers->content_type('text/plain');

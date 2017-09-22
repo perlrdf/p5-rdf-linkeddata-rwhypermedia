@@ -104,8 +104,6 @@ subtest "Write /foo/dahut" => sub {
 };
 
 
-TODO: {
-	local $TODO = 'Challenge not implemented';
 subtest "Get controlurl" => sub {
    $ld->request(Plack::Request->new({}));
 	$ld->type('controls');
@@ -114,10 +112,6 @@ subtest "Get controlurl" => sub {
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 401, "Returns 401");
 };
-};
-
-TODO: {
-	local $TODO = 'Logged in user not implemented';
 
 subtest "Get controlurl with testuser" => sub {
 	$ld->user('testuser');
@@ -145,8 +139,6 @@ subtest "Get controlurl with testuser" => sub {
 								iri($exprefix . 'for'),
 								iri($base_uri . '/foo/data')),
 				  'Write instructions are OK');
-  
-};
 };
 
 done_testing;
