@@ -71,21 +71,6 @@ subtest 'Replace operations with authentication' => sub {
 };
 
 
-subtest "Get /bar/baz/bing, ask for RDF/XML" => sub {
-	$mech->default_header('Accept' => 'application/rdf+xml');
-	$mech->get_ok("/bar/baz/bing");
-	is($mech->ct, 'application/rdf+xml', "Correct content-type");
-	like($mech->uri, qr|/bar/baz/bing/data$|, "Location is OK");
-	is_valid_rdf($mech->content, 'rdfxml', 'Returns valid RDF/XML');
-	my $model = check_content();
-	has_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");
-	hasnt_uri('http://rdfs.org/ns/void#sparqlEndpoint', $model, 'No SPARQL endpoint link in data');
-	hasnt_uri('http://example.org/new2', $model, 'Test data not there yet');
-	my $hmns = RDF::Trine::Namespace->new($exprefix);
-	my $data_iri = iri($base_uri . 'bar/baz/bing/data');
-};
-
-
 sub check_content {
   $mech->default_header('Accept' => 'application/rdf+xml');
   $mech->get_ok("/bar/baz/bing");
