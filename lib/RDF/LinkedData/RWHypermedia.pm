@@ -95,7 +95,7 @@ around '_content' => sub {
 			my $data_iri = iri($node->uri_value . '/data');
 			my $controls_iri = iri($node->uri_value . '/controls');
 			$self->add_namespace_mapping(hm => 'http://example.org/hypermedia#');
-			$self->guess_namespaces('rdf', 'void', 'dct');
+			$self->guess_namespaces('rdf', 'void', 'rdfs');
 			$self->add_namespace_mapping(hydra => 'http://www.w3.org/ns/hydra/core#');
 			
 			my $hm = $self->namespaces->hm;
@@ -108,7 +108,7 @@ around '_content' => sub {
 															iri($self->namespaces->rdf->type),
 															iri($hm->AffordancesDocument)));
 			  $rwmodel->add_statement(statement($controls_iri,
-															iri($self->namespaces->dct->description),
+															iri($self->namespaces->rdfs->comment),
 															literal('This document describes what you can do in terms of write operations on ' . $data_iri->uri_value, 'en')));
 			  $rwmodel->add_statement(statement($controls_iri,
 															iri($hm->for),
