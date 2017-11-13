@@ -71,8 +71,17 @@ around 'response' => sub {
 		return $response;
 	 }
   }
-	 
-	 
+
+  if (($self->type eq 'data') && (! $self->does_read_operation)) {
+	 if ($self->is_logged_in) {
+		# TODO: Merging goes here
+		} else {
+		  $response->status(401);
+		  $response->headers->content_type('text/plain');
+		  $response->body('HTTP 401: Authentication Required');
+		}
+  }
+
   return $orig->($self, @params);
 };
 
