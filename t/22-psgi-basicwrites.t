@@ -42,8 +42,10 @@ subtest 'Write operations without authentication' => sub {
 	is($mech->status, 401, "Putting returns 401");
  };
 
+my $prevcount = 0;
 subtest 'Check before we write' => sub {
   my $model = check_content();
+  $prevcount = $model->size;
 };
   
 ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
@@ -54,14 +56,18 @@ subtest 'Merge operations with authentication' => sub {
   is($mech->status, 204, "Posting returns 204");
 
   my $model = check_content();
-};
+  is($model->size, $prevcount+1, 'Got another triple now');
+  has_predicate('http://example.org/success', $model, 'Got the predicate');
+  has_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");};
 
 subtest 'Replace operations with authentication' => sub {
-  
   $mech->put("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle',
 												 Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Replaced with triple\"\@en" });
   is($mech->status, 201, "Putting returns 201");
   my $model = check_content();
+  is($model->size, 1, 'Only one triple now');
+  has_predicate('http://example.org/success', $model, 'Got the predicate');
+  hasnt_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");
 };
 
 
