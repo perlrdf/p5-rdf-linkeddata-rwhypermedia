@@ -16,6 +16,7 @@ install:
   - cpan-install --toolchain
   - cpan-install --deps
   - cpan-install --coverage
+  - cpan-install https://github.com/kjetilk/RDF-LinkedData.git feature-rw
 before_script:
   - coverage-setup
 script:
