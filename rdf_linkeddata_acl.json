@@ -1,4 +1,6 @@
 {
+    "class" : "RDF::LinkedData::RWHypermedia",
+    "writes_enabled" : 1,
     "base_uri"  : "http://localhost",
     "store" : {
 	"storetype"	: "Memory",
