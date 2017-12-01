@@ -57,7 +57,8 @@ around 'response' => sub {
   if ($self->type eq 'controls') {
 	 if ($self->writes_enabled) {
 		my $node = $self->my_node($uri);
-		$self->log->info("Write operation is attempted for subject node: " . $node->as_string);
+		$self->log->info("Controls for writes for subject node: " . $node->as_string);
+		$self->log->debug('User is ' . $self->user);
 		unless ($self->is_logged_in) {
 		  $response->status(401);
 		  $response->headers->content_type('text/plain');
@@ -73,13 +74,16 @@ around 'response' => sub {
   }
 
   if (($self->type eq 'data') && (! $self->does_read_operation)) {
+	 $self->log->trace("Attempting write");
 	 if ($self->is_logged_in) {
 		# TODO: Merging goes here
-		} else {
-		  $response->status(401);
-		  $response->headers->content_type('text/plain');
-		  $response->body('HTTP 401: Authentication Required');
-		}
+		$self->log->debug('Writing with logged in user: ' . $self->user);
+	 } else {
+		$response->status(401);
+		$response->headers->content_type('text/plain');
+		$response->body('HTTP 401: Authentication Required');
+		return $response;
+	 }
   }
 
   return $orig->($self, @params);
