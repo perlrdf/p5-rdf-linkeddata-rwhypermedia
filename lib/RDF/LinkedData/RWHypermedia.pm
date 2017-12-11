@@ -39,7 +39,7 @@ around 'response' => sub {
   my $response = Plack::Response->new;
 
   my $node = $self->my_node($uri);
-  $self->log->info("Write operation is attempted for subject node: " . $node->as_string);
+  $self->log->trace("Type passed to " . ref($self) .": '" . $self->type . "'.");
   if ($self->count($node) == 0) {
 	 $response->status(404);
 	 $response->headers->content_type('text/plain');
