@@ -152,14 +152,8 @@ around '_content' => sub {
 
 
 has user => ( is => 'rw', isa => Str, lazy => 1, 
-				  builder => '_build_user', 
 				  predicate => 'is_logged_in');
 
-sub _build_user {
-	my $self = shift;
-	my $uname = $self->request->user;
-	return "urn:X-basicauth:$uname" if ($uname);
-}
 
 sub add_rw_pointer {
 	my $self = shift;
