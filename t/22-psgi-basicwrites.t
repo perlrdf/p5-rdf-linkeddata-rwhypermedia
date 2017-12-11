@@ -19,9 +19,10 @@ my $tester = do $ENV{'ROBINHOME'}."/dev/RDF-LinkedData/script/linked_data.psgi";
 
 BAIL_OUT("The application is not running") unless ($tester);
 
-use Log::Log4perl qw(:easy);
+use Log::Any::Adapter;
 
-Log::Log4perl->easy_init( { level   => $FATAL } ) unless $ENV{TEST_VERBOSE};
+Log::Any::Adapter->set($ENV{LOG_ADAPTER} || 'Stderr') if $ENV{TEST_VERBOSE};
+
 
 my $exprefix = 'http://example.org/hypermedia#';
 
