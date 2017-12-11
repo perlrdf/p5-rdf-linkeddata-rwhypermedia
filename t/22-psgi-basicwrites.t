@@ -31,41 +31,50 @@ my $parser = RDF::Trine::Parser->new( 'turtle' );
 my $rxparser = RDF::Trine::Parser->new( 'rdfxml' );
 my $base_uri = 'http://localhost/';
 
-my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
-
 
 subtest 'Write operations without authentication' => sub {
-	$mech->post("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle', 
+  {
+	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+	 $mech->post("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle', 
+													 Content => "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en" });
+	 is($mech->status, 401, "Posting returns 401");
+  }
+  {
+	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+	 $mech->put("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle',
 													Content => "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en" });
-	is($mech->status, 401, "Posting returns 401");
-	$mech->put("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle',
-												  Content => "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en" });
-	is($mech->status, 401, "Putting returns 401");
- };
+	 is($mech->status, 401, "Putting returns 401");
+  }
+};
 
 my $prevcount = 0;
 subtest 'Check before we write' => sub {
-  my $model = check_content();
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $model = check_content($mech);
   $prevcount = $model->size;
 };
-  
-ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+
 
 subtest 'Merge operations with authentication' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+
   $mech->post("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle', 
 												  Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en" });
   is($mech->status, 204, "Posting returns 204");
 
-  my $model = check_content();
+  my $model = check_content($mech);
   is($model->size, $prevcount+1, 'Got another triple now');
   has_predicate('http://example.org/success', $model, 'Got the predicate');
   has_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");};
 
 subtest 'Replace operations with authentication' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->put("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle',
 												 Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Replaced with triple\"\@en" });
   is($mech->status, 201, "Putting returns 201");
-  my $model = check_content();
+  my $model = check_content($mech);
   is($model->size, 1, 'Only one triple now');
   has_predicate('http://example.org/success', $model, 'Got the predicate');
   hasnt_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");
@@ -73,6 +82,7 @@ subtest 'Replace operations with authentication' => sub {
 
 
 sub check_content {
+  my $mech = shift;
   $mech->default_header('Accept' => 'application/rdf+xml');
   $mech->get_ok("/bar/baz/bing");
   is($mech->ct, 'application/rdf+xml', "Correct content-type");
