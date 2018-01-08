@@ -67,7 +67,7 @@ subtest 'Merge operations with authentication' => sub {
   my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Merged triple"@en .';
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
-  is($mech->status, 204, "Posting returns 204");
+  is($mech->status, 200, "Posting returns 200");
 
   my $model = check_content($mech);
   is($model->size, $prevcount+1, 'Got another triple now');
@@ -79,7 +79,7 @@ subtest 'Replace operations with authentication' => sub {
   my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Replaced with triple"@en .';
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
-    is($mech->status, 201, "Putting returns 201");
+    is($mech->status, 200, "Putting returns 200");
   my $model = check_content($mech);
   is($model->size, 1, 'Only one triple now');
   has_predicate('http://example.org/success', $model, 'Got the predicate');

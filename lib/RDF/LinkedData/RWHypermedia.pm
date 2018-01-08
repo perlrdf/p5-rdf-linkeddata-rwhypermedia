@@ -112,14 +112,30 @@ around 'response' => sub {
 		  };
 		  my $iter = $inputmodel->get_statements($node);
 		  my $addcount = 0;
+		  # DISCUSS: How should we merge? Just subjects? And objects? Blank nodes, CBD-ish?
+		  # DISCUSS: Validation? SHACL? Other validation?
 		  while (my $st = $iter->next) {
 			 $addcount++;
 			 $self->model->add_statement($st);
 		  }
 		  my $discarded = $inputmodel->size - $addcount;
 		  $self->log->info("Discarded $discarded triples from input data") if ($discarded);
-
-		  $response->status(204);
+		  
+		  if ($addcount) {
+			 # DISCUSS: Nature of response. Purely rely on HTTP semantics and human readable feedback? RDFa+Human readable? No human readable feedback?
+			 $response->status(200);
+			 $response->headers->content_type('text/plain');
+			 my $body = 'HTTP 200: Success.';
+			 if ($discarded) {
+				$body .= "\nHowever, $discarded triples were discarded from the input\nas they did not have the same subject as the target resources.";
+				$response->body($body);
+			 }
+			 return $response;
+		  } else {
+			 $response->status(403); # DISCUSS: Error code to send when no triples were added. 409?
+			 $response->headers->content_type('text/plain');
+			 $response->body("HTTP 403 Forbidden\nNo triples with the same subject as the resource were found in your request.");
+		  }
 		  return $response;
 		}
 		return [ 405, [ 'Content-type', 'text/plain' ], [ 'Method not implemented' ] ];
