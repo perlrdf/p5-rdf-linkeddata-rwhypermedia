@@ -38,6 +38,13 @@ around 'response' => sub {
   my $req = $self->request;
   my $response = Plack::Response->new;
 
+  if (defined($req->user)) {
+	 $self->user($req->user);
+	 $self->log->debug('Setting username: ' . $self->user);
+  } else {
+	 $self->log->debug('No username supplied');
+  }
+  
   my $node = $self->my_node($uri);
   $self->log->trace("Type passed to " . ref($self) .": '" . $self->type . "'.");
   if ($self->count($node) == 0) {
@@ -163,6 +170,21 @@ sub add_rw_pointer {
 	$hmmodel->add_statement(statement(iri($uri->uri_value . '/data'),
 												 iri($exprefix .  'toEditGoTo'),
 												 iri($uri->uri_value . '/controls')));
+}
+
+
+# Cutnpase from https://metacpan.org/source/MIYAGAWA/Plack-1.0045/lib/Plack/Middleware/Auth/Basic.pm
+
+sub unauthorized {
+    my $self = shift;
+    my $body = 'Authorization required';
+    return [
+        401,
+        [ 'Content-Type' => 'text/plain',
+          'Content-Length' => length $body,
+          'WWW-Authenticate' => 'Basic realm="' . ($self->realm || "restricted area") . '"' ],
+        [ $body ],
+    ];
 }
 
 
