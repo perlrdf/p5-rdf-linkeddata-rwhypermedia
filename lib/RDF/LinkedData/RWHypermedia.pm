@@ -182,7 +182,7 @@ sub unauthorized {
         401,
         [ 'Content-Type' => 'text/plain',
           'Content-Length' => length $body,
-          'WWW-Authenticate' => 'Basic realm="' . ($self->realm || "restricted area") . '"' ],
+          'WWW-Authenticate' => 'Basic realm="restricted area"' ],
         [ $body ],
     ];
 }
