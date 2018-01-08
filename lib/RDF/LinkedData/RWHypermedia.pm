@@ -66,6 +66,7 @@ around 'response' => sub {
 		my $node = $self->my_node($uri);
 		$self->log->info("Controls for writes for subject node: " . $node->as_string);
 		$self->log->debug('User is ' . $self->user);
+		$self->credentials_ok;
 		return $self->unauthorized($response) unless ($self->is_logged_in)
 	 } else {
 		$response->status(403);
@@ -77,6 +78,7 @@ around 'response' => sub {
 
   if (($self->type eq 'data') && (! $self->does_read_operation)) {
 	 $self->log->trace("Attempting write");
+	 $self->credentials_ok;
 	 if ($self->is_logged_in) {
 		# TODO: Merging goes here
 		$self->log->debug('Writing with logged in user: ' . $self->user);
@@ -112,7 +114,7 @@ around '_content' => sub {
 			
 			my $hm = $self->namespaces->hm;
 			
-			if ($self->is_logged_in) {
+			if ($self->is_logged_in) { # Credentials should already have been checked
 			  $self->log->debug('Logged in as: ' . $self->user);
 			  
 			  # TODO: Check ACL
@@ -166,12 +168,12 @@ sub add_rw_pointer {
 
 # some cutnpaste from https://metacpan.org/source/MIYAGAWA/Plack-1.0045/lib/Plack/Middleware/Auth/Basic.pm
 
-sub check_credentials {
+sub credentials_ok {
   my $self = shift;
-  my $req = $self->request;
   my $env = $self->request->env;
   my $auth = $env->{HTTP_AUTHORIZATION}
-	 or return $self->unauthorized;
+	 or return 0;
+  $self->log->trace("Auth information given: $auth");
 
   # note the 'i' on the regex, as, according to RFC2617 this is a 
   # "case-insensitive token to identify the authentication scheme"
@@ -182,9 +184,10 @@ sub check_credentials {
 		$env->{REMOTE_USER} = $user;
 		$self->user($user);
 	 } else {
-		return $self->unauthorized;
+		return 0;
 	 }
   }
+  return 1;
 }
 
 sub unauthorized {
