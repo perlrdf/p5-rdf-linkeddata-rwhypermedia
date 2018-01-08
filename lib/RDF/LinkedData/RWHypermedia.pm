@@ -6,6 +6,7 @@ package RDF::LinkedData::RWHypermedia;
 use Moo;
 use Types::Standard qw(Str);
 use RDF::Trine qw(iri statement literal);
+use RDF::Trine::Parser;
 use Data::Dumper;
 
 extends 'RDF::LinkedData';
@@ -80,8 +81,38 @@ around 'response' => sub {
 	 $self->log->trace("Attempting write");
 	 $self->credentials_ok;
 	 if ($self->is_logged_in) {
-		# TODO: Merging goes here
 		$self->log->debug('Writing with logged in user: ' . $self->user);
+		if (($req->method eq 'DELETE') or ($req->method eq 'PUT')) {
+		  $self->log->debug('Deleting triples with subject ' . $node->as_string);
+		  $self->model->remove_statements($node);
+		  if ($req->method eq 'DELETE') {
+			 $response->status(204);
+			 return $response;
+		  }
+		}
+		if (($req->method eq 'POST') or ($req->method eq 'PUT')) {
+		  $self->log->debug('Adding triples with media type ' . $req->content_type . ' and subject ' . $node->as_string);
+		  my $parser = RDF::Trine::Parser->parser_by_media_type($req->content_type); # TODO: Handle unknown serialization, 415
+		  my $inputmodel = RDF::Trine::Model->temporary_model;
+		  try {
+			 $parser->parse_into_model($self->base_uri, $req->content, $inputmodel)
+		  } catch {
+			 $response->status(400);
+			 $response->headers->content_type('text/plain');
+			 $response->body("HTTP 400: Bad Request.\nCouldn't parse your content, got error\n$_");
+			 return $response;
+		  }
+		  my $iter = $inputmodel->get_statements($node);
+		  my $addcount;
+		  while (my $st = $iter->next) {
+			 $addcount++;
+			 $self->model->add_statement($st);
+		  }
+		  my $incount = $inputmodel->size;
+		  $response->status(204);
+		  return $response;
+		}
+		return [ 405, [ 'Content-type', 'text/plain' ], [ 'Method not implemented' ] ];
 	 } else {
 		return $self->unauthorized($response);
 	 }
