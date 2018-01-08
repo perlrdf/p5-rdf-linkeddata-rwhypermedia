@@ -9,7 +9,7 @@ use RDF::Trine qw[iri literal blank variable statement];
 use Test::WWW::Mechanize::PSGI;
 use Module::Load::Conditional qw[check_install];
 use RDF::Trine::Namespace qw(rdf);
-
+use HTTP::Request ();
 
 
 
@@ -31,18 +31,18 @@ my $parser = RDF::Trine::Parser->new( 'turtle' );
 my $rxparser = RDF::Trine::Parser->new( 'rdfxml' );
 my $base_uri = 'http://localhost/';
 
+my $head = [ 'Content-Type' => 'text/turtle' ];
 
 subtest 'Write operations without authentication' => sub {
+  my $body = "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en .";
   {
 	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
-	 $mech->post("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle', 
-													 Content => "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en" });
+	 $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
 	 is($mech->status, 401, "Posting returns 401");
   }
   {
 	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
-	 $mech->put("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle',
-													Content => "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en" });
+	 $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
 	 is($mech->status, 401, "Putting returns 401");
   }
 };
@@ -55,20 +55,18 @@ subtest 'Check before we write' => sub {
 };
 
 subtest 'Merge operations with authentication wrong content type' => sub {
+  my $body = "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en .";
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
-
-  $mech->post("/bar/baz/bing/data", { 'Content-Type' => 'foo/bar', 
-												  Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en" });
+  $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", [ 'Content-Type' => 'foo/bar' ], $body));
   is($mech->status, 415, "Posting returns 415");
 };
 
 subtest 'Merge operations with authentication' => sub {
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $body = "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en .";
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
-
-  $mech->post("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle', 
-												  Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en" });
+  $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 204, "Posting returns 204");
 
   my $model = check_content($mech);
@@ -78,10 +76,10 @@ subtest 'Merge operations with authentication' => sub {
 
 subtest 'Replace operations with authentication' => sub {
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $body = "<$base_uri/bar/baz/bing> <http://example.org/success> \"Replaced with triple\"\@en .";
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
-  $mech->put("/bar/baz/bing/data", { 'Content-Type' => 'text/turtle',
-												 Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Replaced with triple\"\@en" });
-  is($mech->status, 201, "Putting returns 201");
+  $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
+    is($mech->status, 201, "Putting returns 201");
   my $model = check_content($mech);
   is($model->size, 1, 'Only one triple now');
   has_predicate('http://example.org/success', $model, 'Got the predicate');
