@@ -68,6 +68,7 @@ subtest 'Merge operations with authentication' => sub {
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 200, "Posting returns 200");
+  $mech->content_lacks('discarded', 'No triples discarded');
 
   my $model = check_content($mech);
   is($model->size, $prevcount+1, 'Got another triple now');
@@ -79,11 +80,32 @@ subtest 'Replace operations with authentication' => sub {
   my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Replaced with triple"@en .';
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
-    is($mech->status, 200, "Putting returns 200");
+  is($mech->status, 200, "Putting returns 200");
+  $mech->content_lacks('discarded', 'No triples discarded');
   my $model = check_content($mech);
   is($model->size, 9, 'Only one triple now in addition to hypermedia'); # Even though we replaced them all, the resource will still respond with 8 hypermedia triples (i.e. vocabularies, where to edit, etc
   has_predicate('http://example.org/success', $model, 'Got the predicate');
   hasnt_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");
+};
+
+
+subtest 'Merge operations with authentication and wrong subject' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Merged triple"@en . <http://example.org/foo> a <http://example.org/Dahut> ; <http://example.org/notin> <' .$base_uri . 'bar/baz/bing> .';
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+  $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
+  is($mech->status, 200, "Posting returns 200");
+  $mech->content_contains('2 triples', '2 triples were discarded');
+};
+
+  
+subtest 'Replace operations with authentication and wrong subject' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Replaced with triple"@en . <http://example.org/foo> a <http://example.org/Dahut> ; <http://example.org/notin> <' .$base_uri . 'bar/baz/bing> .';
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+  $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
+  is($mech->status, 200, "Putting returns 200");
+  $mech->content_contains('2 triples', '2 triples were discarded');
 };
 
 
