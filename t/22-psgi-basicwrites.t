@@ -34,7 +34,7 @@ my $base_uri = 'http://localhost/';
 my $head = [ 'Content-Type' => 'text/turtle' ];
 
 subtest 'Write operations without authentication' => sub {
-  my $body = "<$base_uri/bar/baz/bing> <http://example.org/error> \"No merged triple\"\@en .";
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/error> "No merged triple"@en .';
   {
 	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
 	 $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
@@ -55,7 +55,7 @@ subtest 'Check before we write' => sub {
 };
 
 subtest 'Merge operations with authentication wrong content type' => sub {
-  my $body = "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en .";
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Merged triple"@en .';
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", [ 'Content-Type' => 'foo/bar' ], $body));
@@ -64,7 +64,7 @@ subtest 'Merge operations with authentication wrong content type' => sub {
 
 subtest 'Merge operations with authentication' => sub {
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
-  my $body = "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en .";
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Merged triple"@en .';
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 204, "Posting returns 204");
@@ -76,7 +76,7 @@ subtest 'Merge operations with authentication' => sub {
 
 subtest 'Replace operations with authentication' => sub {
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
-  my $body = "<$base_uri/bar/baz/bing> <http://example.org/success> \"Replaced with triple\"\@en .";
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/success> "Replaced with triple"@en .';
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
   $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
     is($mech->status, 201, "Putting returns 201");
