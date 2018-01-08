@@ -109,6 +109,26 @@ subtest 'Replace operations with authentication and wrong subject' => sub {
 };
 
 
+subtest 'Merge operations with authentication and no subject' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $body = '<http://example.org/foo> a <http://example.org/Dahut> ; <http://example.org/notin> <' .$base_uri . 'bar/baz/bing> .';
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+  $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
+  is($mech->status, 403, "Posting returns 403");
+  $mech->content_contains('No triples', 'No triples were found');
+};
+
+  
+subtest 'Replace operations with authentication and wrong subject' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  my $body = '<http://example.org/foo> a <http://example.org/Dahut> ; <http://example.org/notin> <' .$base_uri . 'bar/baz/bing> .';
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+  $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
+  is($mech->status, 403, "Putting returns 403");
+  $mech->content_contains('No triples', 'No triples were found');
+};
+
+
 
 
 sub check_content {
