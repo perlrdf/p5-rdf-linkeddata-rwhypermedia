@@ -66,7 +66,7 @@ around 'response' => sub {
 		my $node = $self->my_node($uri);
 		$self->log->info("Controls for writes for subject node: " . $node->as_string);
 		$self->log->debug('User is ' . $self->user);
-		return $self->unauthorized unless ($self->is_logged_in)
+		return $self->unauthorized($response) unless ($self->is_logged_in)
 	 } else {
 		$response->status(403);
 		$response->headers->content_type('text/plain');
@@ -81,7 +81,8 @@ around 'response' => sub {
 		# TODO: Merging goes here
 		$self->log->debug('Writing with logged in user: ' . $self->user);
 	 } else {
-		return $self->unauthorized;
+		return $self->unauthorized($response);
+	 }
   }
 
   return $orig->($self, @params);
@@ -164,18 +165,16 @@ sub add_rw_pointer {
 }
 
 
-# Cutnpase from https://metacpan.org/source/MIYAGAWA/Plack-1.0045/lib/Plack/Middleware/Auth/Basic.pm
-
 sub unauthorized {
-    my $self = shift;
-    my $body = 'Authorization required';
-    return [
-        401,
-        [ 'Content-Type' => 'text/plain',
-          'Content-Length' => length $body,
-          'WWW-Authenticate' => 'Basic realm="restricted area"' ],
-        [ $body ],
-    ];
+  my $self = shift;
+  my $response = shift;
+  my $body = 'Authorization required';
+  $response->body($body);
+  $response->status(401);
+  $response->headers([ 'Content-Type' => 'text/plain',
+							  'Content-Length' => length $body,
+							  'WWW-Authenticate' => 'Basic realm="restricted area"' ]);
+  return $response;
 }
 
 
