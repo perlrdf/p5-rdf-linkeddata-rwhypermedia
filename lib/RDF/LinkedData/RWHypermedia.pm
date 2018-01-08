@@ -7,6 +7,7 @@ use Moo;
 use Types::Standard qw(Str);
 use RDF::Trine qw(iri statement literal);
 use RDF::Trine::Parser;
+use Try::Tiny;
 use Data::Dumper;
 
 extends 'RDF::LinkedData';
@@ -92,23 +93,32 @@ around 'response' => sub {
 		}
 		if (($req->method eq 'POST') or ($req->method eq 'PUT')) {
 		  $self->log->debug('Adding triples with media type ' . $req->content_type . ' and subject ' . $node->as_string);
-		  my $parser = RDF::Trine::Parser->parser_by_media_type($req->content_type); # TODO: Handle unknown serialization, 415
+		  my $parser = RDF::Trine::Parser->parser_by_media_type($req->content_type);
+		  unless (defined($parser)) {
+			 $response->status(415);
+			 $response->headers->content_type('text/plain');
+			 $response->body("HTTP 415: Unknown format.\nThis host cannot parse the RDF format you supplied, please try a different serialisation");
+			 return $response;
+		  }
 		  my $inputmodel = RDF::Trine::Model->temporary_model;
+		  $self->log->trace("Got message body:\n". $req->content);
 		  try {
-			 $parser->parse_into_model($self->base_uri, $req->content, $inputmodel)
+			 $parser->parse_into_model($self->base_uri, $req->content, $inputmodel);
 		  } catch {
 			 $response->status(400);
 			 $response->headers->content_type('text/plain');
 			 $response->body("HTTP 400: Bad Request.\nCouldn't parse your content, got error\n$_");
 			 return $response;
-		  }
+		  };
 		  my $iter = $inputmodel->get_statements($node);
-		  my $addcount;
+		  my $addcount = 0;
 		  while (my $st = $iter->next) {
 			 $addcount++;
 			 $self->model->add_statement($st);
 		  }
-		  my $incount = $inputmodel->size;
+		  my $discarded = $inputmodel->size - $addcount;
+		  $self->log->info("Discarded $discarded triples from input data") if ($discarded);
+
 		  $response->status(204);
 		  return $response;
 		}
