@@ -54,6 +54,14 @@ subtest 'Check before we write' => sub {
   $prevcount = $model->size;
 };
 
+subtest 'Merge operations with authentication wrong content type' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+
+  $mech->post("/bar/baz/bing/data", { 'Content-Type' => 'foo/bar', 
+												  Content => "<$base_uri/bar/baz/bing> <http://example.org/success> \"Merged triple\"\@en" });
+  is($mech->status, 415, "Posting returns 415");
+};
 
 subtest 'Merge operations with authentication' => sub {
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
@@ -79,6 +87,8 @@ subtest 'Replace operations with authentication' => sub {
   has_predicate('http://example.org/success', $model, 'Got the predicate');
   hasnt_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");
 };
+
+
 
 
 sub check_content {
