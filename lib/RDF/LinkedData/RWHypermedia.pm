@@ -66,12 +66,7 @@ around 'response' => sub {
 		my $node = $self->my_node($uri);
 		$self->log->info("Controls for writes for subject node: " . $node->as_string);
 		$self->log->debug('User is ' . $self->user);
-		unless ($self->is_logged_in) {
-		  $response->status(401);
-		  $response->headers->content_type('text/plain');
-		  $response->body('HTTP 401: Authentication Required');
-		  return $response;
-		}
+		return $self->unauthorized unless ($self->is_logged_in)
 	 } else {
 		$response->status(403);
 		$response->headers->content_type('text/plain');
@@ -86,11 +81,7 @@ around 'response' => sub {
 		# TODO: Merging goes here
 		$self->log->debug('Writing with logged in user: ' . $self->user);
 	 } else {
-		$response->status(401);
-		$response->headers->content_type('text/plain');
-		$response->body('HTTP 401: Authentication Required');
-		return $response;
-	 }
+		return $self->unauthorized;
   }
 
   return $orig->($self, @params);
