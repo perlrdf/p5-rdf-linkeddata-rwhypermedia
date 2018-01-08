@@ -164,6 +164,28 @@ sub add_rw_pointer {
 												 iri($uri->uri_value . '/controls')));
 }
 
+# some cutnpaste from https://metacpan.org/source/MIYAGAWA/Plack-1.0045/lib/Plack/Middleware/Auth/Basic.pm
+
+sub check_credentials {
+  my $self = shift;
+  my $req = $self->request;
+  my $env = $self->request->env;
+  my $auth = $env->{HTTP_AUTHORIZATION}
+	 or return $self->unauthorized;
+
+  # note the 'i' on the regex, as, according to RFC2617 this is a 
+  # "case-insensitive token to identify the authentication scheme"
+  if ($auth =~ /^Basic (.*)$/i) {
+	 my($user, $pass) = split /:/, (MIME::Base64::decode($1) || ":"), 2;
+	 $pass = '' unless defined $pass;
+	 if ($self->authenticator($user, $pass, $env)) {
+		$env->{REMOTE_USER} = $user;
+		$self->user($user);
+	 } else {
+		return $self->unauthorized;
+	 }
+  }
+}
 
 sub unauthorized {
   my $self = shift;
@@ -177,6 +199,10 @@ sub unauthorized {
   return $response;
 }
 
+sub authenticator {
+  my ($self, $user, $pass, $env) = @_;
+  return ($user eq 'testuser' && $pass eq 'sikrit');
+}
 
 
 =head1 BUGS
