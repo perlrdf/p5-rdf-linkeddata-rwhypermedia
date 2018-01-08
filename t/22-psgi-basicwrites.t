@@ -81,7 +81,7 @@ subtest 'Replace operations with authentication' => sub {
   $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
     is($mech->status, 200, "Putting returns 200");
   my $model = check_content($mech);
-  is($model->size, 1, 'Only one triple now');
+  is($model->size, 9, 'Only one triple now in addition to hypermedia'); # Even though we replaced them all, the resource will still respond with 8 hypermedia triples (i.e. vocabularies, where to edit, etc
   has_predicate('http://example.org/success', $model, 'Got the predicate');
   hasnt_literal('Testing with longer URI.', 'en', undef, $model, "Test phrase in content");
 };
