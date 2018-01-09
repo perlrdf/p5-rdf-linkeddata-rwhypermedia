@@ -140,7 +140,10 @@ around 'response' => sub {
 		  }
 		  return $response;
 		}
-		return [ 405, [ 'Content-type', 'text/plain' ], [ 'Method not implemented' ] ];
+		$response->status(405);
+		$response->headers->content_type('text/plain');
+		$response->body("HTTP 405: Method not implemented");
+		return $response;
 	 } else {
 		return $self->unauthorized($response);
 	 }
