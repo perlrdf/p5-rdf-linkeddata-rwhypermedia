@@ -83,16 +83,14 @@ around 'response' => sub {
 	 $self->credentials_ok;
 	 if ($self->is_logged_in) {
 		$self->log->debug('Writing with logged in user: ' . $self->user);
-		if (($req->method eq 'DELETE') or ($req->method eq 'PUT')) {
+		if ($req->method eq 'DELETE') {
 		  $self->log->debug('Deleting triples with subject ' . $node->as_string);
 		  $self->model->remove_statements($node);
-		  if ($req->method eq 'DELETE') {
-			 $response->status(204);
-			 return $response;
-		  }
+		  $response->status(204);
+		  return $response;
 		}
 		if (($req->method eq 'POST') or ($req->method eq 'PUT')) {
-		  $self->log->debug('Adding triples with media type ' . $req->content_type . ' and subject ' . $node->as_string);
+		  $self->log->debug('Prepare to add triples with media type ' . $req->content_type . ' and subject ' . $node->as_string);
 		  my $parser = RDF::Trine::Parser->parser_by_media_type($req->content_type);
 		  unless (defined($parser)) {
 			 $response->status(415);
@@ -111,6 +109,17 @@ around 'response' => sub {
 			 return $response;
 		  };
 		  my $iter = $inputmodel->get_statements($node);
+		  unless (defined($iter->peek)) {
+			 $self->log->debug('Found no triples for subject ' . $node->as_string);
+			 $response->status(403); # DISCUSS: Error code to send when no triples were added. 409?
+			 $response->headers->content_type('text/plain');
+			 $response->body("HTTP 403 Forbidden\nNo triples with the same subject as the resource were found in your request.");
+			 return $response;
+		  }
+		  if ($req->method eq 'PUT') {
+			 $self->log->debug('But first, we delete triples with subject ' . $node->as_string);
+			 $self->model->remove_statements($node);
+		  }
 		  my $addcount = 0;
 		  # DISCUSS: How should we merge? Just subjects? And objects? Blank nodes, CBD-ish?
 		  # DISCUSS: Validation? SHACL? Other validation?
@@ -120,21 +129,14 @@ around 'response' => sub {
 		  }
 		  my $discarded = $inputmodel->size - $addcount;
 		  $self->log->info("Discarded $discarded triples from input data") if ($discarded);
-		  
-		  if ($addcount) {
-			 # DISCUSS: Nature of response. Purely rely on HTTP semantics and human readable feedback? RDFa+Human readable? No human readable feedback?
-			 $response->status(200);
-			 $response->headers->content_type('text/plain');
-			 my $body = 'HTTP 200: Success.';
-			 if ($discarded) {
-				$body .= "\nHowever, $discarded triples were discarded from the input\nas they did not have the same subject as the target resources.";
-				$response->body($body);
-			 }
-			 return $response;
-		  } else {
-			 $response->status(403); # DISCUSS: Error code to send when no triples were added. 409?
-			 $response->headers->content_type('text/plain');
-			 $response->body("HTTP 403 Forbidden\nNo triples with the same subject as the resource were found in your request.");
+
+		  # DISCUSS: Nature of response. Purely rely on HTTP semantics and human readable feedback? RDFa+Human readable? No human readable feedback?
+		  $response->status(200);
+		  $response->headers->content_type('text/plain');
+		  my $body = 'HTTP 200: Success.';
+		  if ($discarded) {
+			 $body .= "\nHowever, $discarded triples were discarded from the input\nas they did not have the same subject as the target resources.";
+			 $response->body($body);
 		  }
 		  return $response;
 		}
