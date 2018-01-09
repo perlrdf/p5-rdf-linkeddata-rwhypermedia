@@ -96,6 +96,7 @@ subtest 'Merge operations with authentication and wrong subject' => sub {
   $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 200, "Posting returns 200");
   $mech->content_contains('2 triples', '2 triples were discarded');
+  my $model = check_content($mech);
 };
 
   
@@ -106,6 +107,7 @@ subtest 'Replace operations with authentication and wrong subject' => sub {
   $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 200, "Putting returns 200");
   $mech->content_contains('2 triples', '2 triples were discarded');
+  my $model = check_content($mech);
 };
 
 
@@ -116,6 +118,7 @@ subtest 'Merge operations with authentication and no subject' => sub {
   $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 403, "Posting returns 403");
   $mech->content_contains('No triples', 'No triples were found');
+  my $model = check_content($mech);
 };
 
   
@@ -126,9 +129,21 @@ subtest 'Replace operations with authentication and wrong subject' => sub {
   $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
   is($mech->status, 403, "Putting returns 403");
   $mech->content_contains('No triples', 'No triples were found');
+  my $model = check_content($mech);
 };
 
-
+subtest 'Delete operation with authentication' => sub {
+  my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+  ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
+  $mech->request(HTTP::Request->new('DELETE', "/bar/baz/bing/data", $head, ""));
+  is($mech->status, 204, "Deleting returns 204");
+  $mech->get("/bar/baz/bing/data");
+  is($mech->status, 404, "data returns 404");
+  $mech->get("/bar/baz/bing");
+  is($mech->status, 404, "resource returns 404");
+  $mech->get("/bar/baz/bing/control");
+  is($mech->status, 404, "control returns 404");
+};
 
 
 sub check_content {
