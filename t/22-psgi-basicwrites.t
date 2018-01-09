@@ -10,12 +10,18 @@ use Test::WWW::Mechanize::PSGI;
 use Module::Load::Conditional qw[check_install];
 use RDF::Trine::Namespace qw(rdf);
 use HTTP::Request ();
-
+use Config::ZOMG;
+use Plack::App::RDF::LinkedData;
 
 
 $ENV{'RDF_LINKEDDATA_CONFIG_LOCAL_SUFFIX'} = 'acl';
 
-my $tester = do $ENV{'ROBINHOME'}."/dev/RDF-LinkedData/script/linked_data.psgi";
+my $config = Config::ZOMG->open(name => "RDF::LinkedData");
+my $linkeddata = Plack::App::RDF::LinkedData->new();
+
+$linkeddata->configure($config);
+
+my $tester = $linkeddata->to_app;
 
 BAIL_OUT("The application is not running") unless ($tester);
 
