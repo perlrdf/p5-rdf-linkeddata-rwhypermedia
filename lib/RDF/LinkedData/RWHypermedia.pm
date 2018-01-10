@@ -1,8 +1,10 @@
+package RDF::LinkedData::RWHypermedia;
+
 use 5.010001;
 use strict;
 use warnings;
 
-package RDF::LinkedData::RWHypermedia;
+
 use Moo;
 use Types::Standard qw(Str);
 use RDF::Trine qw(iri statement literal);
@@ -65,7 +67,6 @@ around 'response' => sub {
   
   if ($self->type eq 'controls') {
 	 if ($self->writes_enabled) {
-		my $node = $self->my_node($uri);
 		$self->log->info("Controls for writes for subject node: " . $node->as_string);
 		$self->log->debug('User is ' . $self->user);
 		$self->credentials_ok;
