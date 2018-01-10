@@ -5,9 +5,13 @@
 `RDF-LinkedData-RWHypermedia`
     :test-requirement       [ :on "Test::More 0.96"^^:CpanId ];
     :test-requirement       [ :on "Test::RDF 1.21"^^:CpanId ];
+    :test-requirement       [ :on "Test::WWW::Mechanize::PSGI"^^:CpanId ];
+    :test-requirement       [ :on "HTTP::Request"^^:CpanId ];
     :runtime-requirement    [ :on "Moo"^^:CpanId ];
     :runtime-requirement    [ :on "RDF::LinkedData 1.90_01"^^:CpanId ];
-#    :runtime-requirement    [ :on "RDF::ACL"^^:CpanId ];
+    :runtime-requirement    [ :on "Try::Tiny"^^:CpanId ];
+    :runtime-requirement    [ :on "RDF::Trine"^^:CpanId ];
+    :runtime-requirement    [ :on "Types::Standard"^^:CpanId ];
     :develop-recommendation [ :on "Dist::Inkt 0.001"^^:CpanId ];
     .
 
