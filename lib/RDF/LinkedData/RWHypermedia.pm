@@ -51,105 +51,100 @@ around 'response' => sub {
   
   my $node = $self->my_node($uri);
   $self->log->trace("Type passed to " . ref($self) .": '" . $self->type . "'.");
-  if ($self->count($node) == 0) {
-	 $response->status(404);
-	 $response->headers->content_type('text/plain');
-	 $response->body('HTTP 404: Unknown resource');
-	 return $response;
-  }
+  if ($self->count($node) > 0) { # All resources that can be edited have triples that can be counted, let others be dealt with by orig
   
-  unless (($self->type eq 'data') || $self->does_read_operation) {
-	 $response->status(405);
-	 $response->headers->content_type('text/plain');
-	 $response->body("HTTP 405: Method not allowed.\nWrites can only be done against data information resources, not " . $self->type . ".\nTry getting ./controls\n");
-	 return $response;
-  }
-  
-  if ($self->type eq 'controls') {
-	 if ($self->writes_enabled) {
-		$self->log->info("Controls for writes for subject node: " . $node->as_string);
-		$self->log->debug('User is ' . $self->user);
-		$self->credentials_ok;
-		return $self->unauthorized($response) unless ($self->is_logged_in)
-	 } else {
-		$response->status(403);
-		$response->headers->content_type('text/plain');
-		$response->body("HTTP 403: Forbidden.\nServer is configured without writes.");
-		return $response;
-	 }
-  }
-
-  if (($self->type eq 'data') && (! $self->does_read_operation)) {
-	 $self->log->trace("Attempting write");
-	 $self->credentials_ok;
-	 if ($self->is_logged_in) {
-		$self->log->debug('Writing with logged in user: ' . $self->user);
-		if ($req->method eq 'DELETE') {
-		  $self->log->debug('Deleting triples with subject ' . $node->as_string);
-		  $self->model->remove_statements($node);
-		  $response->status(204);
-		  return $response;
-		}
-		if (($req->method eq 'POST') or ($req->method eq 'PUT')) {
-		  $self->log->debug('Prepare to add triples with media type ' . $req->content_type . ' and subject ' . $node->as_string);
-		  my $parser = RDF::Trine::Parser->parser_by_media_type($req->content_type);
-		  unless (defined($parser)) {
-			 $response->status(415);
-			 $response->headers->content_type('text/plain');
-			 $response->body("HTTP 415: Unknown format.\nThis host cannot parse the RDF format you supplied, please try a different serialisation");
-			 return $response;
-		  }
-		  my $inputmodel = RDF::Trine::Model->temporary_model;
-		  $self->log->trace("Got message body:\n". $req->content);
-		  try {
-			 $parser->parse_into_model($self->base_uri, $req->content, $inputmodel);
-		  } catch {
-			 $response->status(400);
-			 $response->headers->content_type('text/plain');
-			 $response->body("HTTP 400: Bad Request.\nCouldn't parse your content, got error\n$_");
-			 return $response;
-		  };
-		  my $iter = $inputmodel->get_statements($node);
-		  unless (defined($iter->peek)) {
-			 $self->log->debug('Found no triples for subject ' . $node->as_string);
-			 $response->status(403); # DISCUSS: Error code to send when no triples were added. 409?
-			 $response->headers->content_type('text/plain');
-			 $response->body("HTTP 403 Forbidden\nNo triples with the same subject as the resource were found in your request.");
-			 return $response;
-		  }
-		  if ($req->method eq 'PUT') {
-			 $self->log->debug('But first, we delete triples with subject ' . $node->as_string);
-			 $self->model->remove_statements($node);
-		  }
-		  my $addcount = 0;
-		  # DISCUSS: How should we merge? Just subjects? And objects? Blank nodes, CBD-ish?
-		  # DISCUSS: Validation? SHACL? Other validation?
-		  while (my $st = $iter->next) {
-			 $addcount++;
-			 $self->model->add_statement($st);
-		  }
-		  my $discarded = $inputmodel->size - $addcount;
-		  $self->log->info("Discarded $discarded triples from input data") if ($discarded);
-
-		  # DISCUSS: Nature of response. Purely rely on HTTP semantics and human readable feedback? RDFa+Human readable? No human readable feedback?
-		  $response->status(200);
-		  $response->headers->content_type('text/plain');
-		  my $body = 'HTTP 200: Success.';
-		  if ($discarded) {
-			 $body .= "\nHowever, $discarded triples were discarded from the input\nas they did not have the same subject as the target resources.";
-			 $response->body($body);
-		  }
-		  return $response;
-		}
+	 unless (($self->type eq 'data') || $self->does_read_operation) {
 		$response->status(405);
 		$response->headers->content_type('text/plain');
-		$response->body("HTTP 405: Method not implemented");
+		$response->body("HTTP 405: Method not allowed.\nWrites can only be done against data information resources, not " . $self->type . ".\nTry getting ./controls\n");
 		return $response;
-	 } else {
-		return $self->unauthorized($response);
+	 }
+	 
+	 if ($self->type eq 'controls') {
+		if ($self->writes_enabled) {
+		  $self->log->info("Controls for writes for subject node: " . $node->as_string);
+		  $self->log->debug('User is ' . $self->user);
+		  $self->credentials_ok;
+		  return $self->unauthorized($response) unless ($self->is_logged_in)
+		} else {
+		  $response->status(403);
+		  $response->headers->content_type('text/plain');
+		  $response->body("HTTP 403: Forbidden.\nServer is configured without writes.");
+		  return $response;
+		}
+	 }
+	 
+	 if (($self->type eq 'data') && (! $self->does_read_operation)) {
+		$self->log->trace("Attempting write");
+		$self->credentials_ok;
+		if ($self->is_logged_in) {
+		  $self->log->debug('Writing with logged in user: ' . $self->user);
+		  if ($req->method eq 'DELETE') {
+			 $self->log->debug('Deleting triples with subject ' . $node->as_string);
+			 $self->model->remove_statements($node);
+			 $response->status(204);
+			 return $response;
+		  }
+		  if (($req->method eq 'POST') or ($req->method eq 'PUT')) {
+			 $self->log->debug('Prepare to add triples with media type ' . $req->content_type . ' and subject ' . $node->as_string);
+			 my $parser = RDF::Trine::Parser->parser_by_media_type($req->content_type);
+			 unless (defined($parser)) {
+				$response->status(415);
+				$response->headers->content_type('text/plain');
+				$response->body("HTTP 415: Unknown format.\nThis host cannot parse the RDF format you supplied, please try a different serialisation");
+				return $response;
+			 }
+			 my $inputmodel = RDF::Trine::Model->temporary_model;
+			 $self->log->trace("Got message body:\n". $req->content);
+			 try {
+				$parser->parse_into_model($self->base_uri, $req->content, $inputmodel);
+			 } catch {
+				$response->status(400);
+				$response->headers->content_type('text/plain');
+				$response->body("HTTP 400: Bad Request.\nCouldn't parse your content, got error\n$_");
+				return $response;
+			 };
+			 my $iter = $inputmodel->get_statements($node);
+			 unless (defined($iter->peek)) {
+				$self->log->debug('Found no triples for subject ' . $node->as_string);
+				$response->status(403); # DISCUSS: Error code to send when no triples were added. 409?
+				$response->headers->content_type('text/plain');
+				$response->body("HTTP 403 Forbidden\nNo triples with the same subject as the resource were found in your request.");
+				return $response;
+			 }
+			 if ($req->method eq 'PUT') {
+				$self->log->debug('But first, we delete triples with subject ' . $node->as_string);
+				$self->model->remove_statements($node);
+			 }
+			 my $addcount = 0;
+			 # DISCUSS: How should we merge? Just subjects? And objects? Blank nodes, CBD-ish?
+			 # DISCUSS: Validation? SHACL? Other validation?
+			 while (my $st = $iter->next) {
+				$addcount++;
+				$self->model->add_statement($st);
+			 }
+			 my $discarded = $inputmodel->size - $addcount;
+			 $self->log->info("Discarded $discarded triples from input data") if ($discarded);
+			 
+			 # DISCUSS: Nature of response. Purely rely on HTTP semantics and human readable feedback? RDFa+Human readable? No human readable feedback?
+			 $response->status(200);
+			 $response->headers->content_type('text/plain');
+			 my $body = 'HTTP 200: Success.';
+			 if ($discarded) {
+				$body .= "\nHowever, $discarded triples were discarded from the input\nas they did not have the same subject as the target resources.";
+				$response->body($body);
+			 }
+			 return $response;
+		  }
+		  $response->status(405);
+		  $response->headers->content_type('text/plain');
+		  $response->body("HTTP 405: Method not implemented");
+		  return $response;
+		} else {
+		  return $self->unauthorized($response);
+		}
 	 }
   }
-
   return $orig->($self, @params);
 };
 
