@@ -188,6 +188,12 @@ around '_content' => sub {
 			  $rwmodel->add_statement(statement($data_iri,
 															iri($hm->canBe),
 															iri($hm->mergedInto)));
+			  $rwmodel->add_statement(statement($data_iri,
+															iri($hm->canBe),
+															iri($hm->replaced)));
+			  $rwmodel->add_statement(statement($data_iri,
+															iri($hm->canBe),
+															iri($hm->deleted)));
 
 			  my ($ctype, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $headers_in,
 																					base => $self->base_uri,
