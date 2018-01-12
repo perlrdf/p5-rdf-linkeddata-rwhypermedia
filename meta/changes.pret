@@ -1,6 +1,10 @@
 # This file acts as the project's changelog.
 
 `RDF-LinkedData-RWHypermedia 0.001_01 cpan:KJETILK`
-	issued  2017-07-22;
+	issued  2018-01-10;
 	label   "Initial release".
+
+`RDF-LinkedData-RWHypermedia 0.001_02 cpan:KJETILK`
+	issued  2017-01-12;
+	label   "Bugfix and document".
 
