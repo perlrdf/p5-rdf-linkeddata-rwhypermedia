@@ -51,6 +51,38 @@ Also, hypermedia is on by default, ensure that it isn't turned off.
 
 Then, start the server as you would with L<Plack::App::RDF::LinkedData>.
 
+=head2 Behaviour
+
+In addition to the behaviour documented in
+L<Plack::App::RDF::LinkedData>, this module will add a predicate to
+any data about a certain resource that tells the user it can check a
+certain URI to see if it may edit the resource description. If the
+user goes there, they will be challenged to authenticate, and if
+authorized (currently, an authenticated user has all privileges), they
+will be shown how to edit the resource description.
+
+Extending the examples of L<Plack::App::RDF::LinkedData>,
+C<http://host.name/rdf/example/data> points to
+C<http://host.name/rdf/example/control>, which when authorized, shows
+the users triples like
+
+  <http://host.name/rdf/example/data> hm:canBe hm:replaced .
+
+thus encouraging the user to replace the data with a new resource
+description. The idea is further that C<hm:replaced> can be defined
+with protocol-specific semantics, for example that in HTTP, it means
+that the user may PUT data in an RDF format to the URL.
+
+=head2 TODO
+
+The idea is also that this approach should be extended to support
+different identity (WebID is an obvious candidate) and authorization
+regimes (I started implementing the W3C access control lists ontology,
+but found it more urgent to get the hypermedia ideas
+coded). Eventually, I think this approach should reach parity with the
+Linked Data Platform, but without an out-of-band specification.
+
+
 =head1 METHODS AND ATTRIBUTES
 
 =item C<< response >>
@@ -318,16 +350,27 @@ sub authenticator {
 }
 
 
-=head1 BUGS
+=head1 FEEDBACK
+
+Since this is a prototype, I hope this will spark discussion. There
+are some discussion items inline in the code. They include how and
+what data should be merged to a given URL, what the responses should
+look like.
+
+Apart from comments to my email, the IRC channels
+L<irc://irc.perl.org/#perlrdf> and L<irc://irc.freenode.net/#swig> are
+good forums for discussing this topic.
+
+I will be blogging about this work at
+L<http://kjetil.kjernsmo.net/category/technology/hypermedia/>.
+
+
+=head2 Bugs
 
 Please report any bugs to
 L<https://github.com/kjetilk/p5-rdf-linkeddata-rwhypermedia/issues>.
 
-=head1 SEE ALSO
-
-L<RDF::LinkedData>
-
-=head1 AUTHOR
+=head2 Author
 
 Kjetil Kjernsmo E<lt>kjetilk@cpan.orgE<gt>.
 
