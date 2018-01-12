@@ -63,7 +63,7 @@ will be shown how to edit the resource description.
 
 Extending the examples of L<Plack::App::RDF::LinkedData>,
 C<http://host.name/rdf/example/data> points to
-C<http://host.name/rdf/example/control>, which when authorized, shows
+C<http://host.name/rdf/example/controls>, which when authorized, shows
 the users triples like
 
   <http://host.name/rdf/example/data> hm:canBe hm:replaced .
