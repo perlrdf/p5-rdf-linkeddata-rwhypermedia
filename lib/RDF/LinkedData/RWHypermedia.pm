@@ -85,6 +85,8 @@ Linked Data Platform, but without an out-of-band specification.
 
 =head1 METHODS AND ATTRIBUTES
 
+=over
+
 =item C<< response >>
 
 This module wraps L<RDF::LinkedData>s C<response> method, taking
@@ -100,14 +102,16 @@ Can be read or set to the username of the logged in user.
 
 Indicates whether a user is logged in.
 
-=item C<< add_rw_pointer ($hypermedia_model, $uri)
+=item C<< add_rw_pointer ($hypermedia_model, $uri) >>
 
 A method that will add a triple to the data page for the given URI to the model building the hypermedia of the response.
 
-=item C<< credentials_ok >>, C<< unauthorized >>, C<< authenticator>>
+=item C<< credentials_ok >>, C<< unauthorized >>, C<< authenticator >>
 
 Methods that deals with authentication and authorization. This part is
 really not stable, just for demo purposes at present.
+
+=back
 
 =cut
 
