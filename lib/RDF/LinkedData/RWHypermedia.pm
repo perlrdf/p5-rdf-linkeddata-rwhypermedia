@@ -275,7 +275,7 @@ sub authenticator {
 =head1 BUGS
 
 Please report any bugs to
-L<http://rt.cpan.org/Dist/Display.html?Queue=RDF-LinkedData-RWHypermedia>.
+L<https://github.com/kjetilk/p5-rdf-linkeddata-rwhypermedia/issues>.
 
 =head1 SEE ALSO
 
