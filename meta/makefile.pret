@@ -14,7 +14,7 @@
     :runtime-recommendation [ :on "Log::Any::Adapter"^^:CpanId ];
     :develop-recommendation [ :on "Log::Any::Adapter::Screen"^^:CpanId ];
     :runtime-requirement    [ :on "Moo"^^:CpanId ];
-    :runtime-requirement    [ :on "RDF::LinkedData 1.90_01"^^:CpanId ];
+    :runtime-requirement    [ :on "RDF::LinkedData 1.90_02"^^:CpanId ];
     :runtime-requirement    [ :on "Try::Tiny"^^:CpanId ];
     :runtime-requirement    [ :on "RDF::Trine"^^:CpanId ];
     :runtime-requirement    [ :on "Types::Standard"^^:CpanId ];
