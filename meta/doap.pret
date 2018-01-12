@@ -15,7 +15,7 @@
         prov:has_provenance <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2Fp5-rdf-linkeddata-rwhypermedia&serialization=PROV-O#> 
         ];
     :created              2017-07-22;
-    :category             <http://dbpedia.org/resource/Category:Semantic_Web>, <http://dbpedia.org/resource/Category:Hypermedia> .
+    :category             <http://dbpedia.org/resource/Category:Semantic_Web>, <http://dbpedia.org/resource/Category:Hypermedia> ;
     :license              <http://dev.perl.org/licenses/>;
     :support-forum        <irc://irc.perl.org/#perlrdf>, <irc://irc.freenode.net/#swig> ;
     :maintainer           cpan:KJETILK;
