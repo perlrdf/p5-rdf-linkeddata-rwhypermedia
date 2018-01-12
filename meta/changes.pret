@@ -8,3 +8,7 @@
 	issued  2017-01-12;
 	label   "Bugfix and document".
 
+`RDF-LinkedData-RWHypermedia 0.001_03 cpan:KJETILK`
+	issued  2017-01-12;
+	label   "Fix typo in docs".
+
