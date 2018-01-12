@@ -29,10 +29,56 @@ RDF::LinkedData::RWHypermedia - Experimental read-write hypermedia support for L
 
 =head1 SYNOPSIS
 
+This module extends L<RDF::LinkedData>, and you would most likely not
+call this module directly, but rather configure it using the tools
+that L<RDF::LinkedData> provides.
+
 =head1 DESCRIPTION
 
+This module is an experiment to manipulate Linked Data using human and
+machine readable hypermedia descriptions. The intention is to have
+messages that are intuitive to newcomers, so that they can get going
+using it without much training. For now, it has very basic,
+prototypical functionality, but it represents an implementation of an
+idea that the author thinks is worth discussing.
+
+To use it, please see the README of L<RDF::LinkedData>. To that configuration, add the two options
+
+    "class" : "RDF::LinkedData::RWHypermedia",
+    "writes_enabled" : 1,
+
+Also, hypermedia is on by default, ensure that it isn't turned off.
+
+Then, start the server as you would with L<Plack::App::RDF::LinkedData>.
+
+=head1 METHODS AND ATTRIBUTES
+
+=item C<< response >>
+
+This module wraps L<RDF::LinkedData>s C<response> method, taking
+control of write methods and data to be added to the response for
+controls and data. The latter is achieved by also wrapping the private
+C<_content> method.
+
+=item C<< user >>
+
+Can be read or set to the username of the logged in user.
+
+=item C<< is_logged_in >> 
+
+Indicates whether a user is logged in.
+
+=item C<< add_rw_pointer ($hypermedia_model, $uri)
+
+A method that will add a triple to the data page for the given URI to the model building the hypermedia of the response.
+
+=item C<< credentials_ok >>, C<< unauthorized >>, C<< authenticator>>
+
+Methods that deals with authentication and authorization. This part is
+really not stable, just for demo purposes at present.
 
 =cut
+
 
 around 'response' => sub {
   my $orig = shift;
@@ -279,13 +325,15 @@ L<https://github.com/kjetilk/p5-rdf-linkeddata-rwhypermedia/issues>.
 
 =head1 SEE ALSO
 
+L<RDF::LinkedData>
+
 =head1 AUTHOR
 
 Kjetil Kjernsmo E<lt>kjetilk@cpan.orgE<gt>.
 
 =head1 COPYRIGHT AND LICENCE
 
-This software is copyright (c) 2017 by Kjetil Kjernsmo.
+This software is copyright (c) 2017, 2018 by Kjetil Kjernsmo.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
