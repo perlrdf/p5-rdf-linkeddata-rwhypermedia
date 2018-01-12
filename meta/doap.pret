@@ -1,19 +1,26 @@
 # This file contains general metadata about the project.
 
 @prefix : <http://usefulinc.com/ns/doap#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
 
 `RDF-LinkedData-RWHypermedia`
-	:programming-language "Perl" ;
-	:shortdesc            "Experimental read-write hypermedia support for Linked Data";
-	:homepage             <https://metacpan.org/release/RDF-LinkedData-RWHypermedia>;
-	:download-page        <https://metacpan.org/release/RDF-LinkedData-RWHypermedia>;
-	:bug-database         <http://rt.cpan.org/Dist/Display.html?Queue=RDF-LinkedData-RWHypermedia>;
-#	:repository           [ a :GitRepository; :browse <https://github.com/kjetilk/p5-rdf-linkeddata-rwhypermedia> ];
-	:created              2017-07-22;
-	:license              <http://dev.perl.org/licenses/>;
-	:maintainer           cpan:KJETILK;
-	:developer            cpan:KJETILK.
-
+    :programming-language "Perl" ;
+    :shortdesc            "Experimental read-write hypermedia support for Linked Data";
+    :homepage             <https://metacpan.org/release/RDF-LinkedData-RWHypermedia>;
+    :download-page        <https://metacpan.org/release/RDF-LinkedData-RWHypermedia>;
+    :bug-database         <http://rt.cpan.org/Dist/Display.html?Queue=RDF-LinkedData-RWHypermedia>;
+    :repository           [
+        a :GitRepository;
+        :browse <https://github.com/kjetilk/p5-rdf-linkeddata-rwhypermedia> ;
+        prov:has_provenance <http://git2prov.org/git2prov?giturl=https%3A%2F%2Fgithub.com%2Fkjetilk%2Fp5-rdf-linkeddata-rwhypermedia&serialization=PROV-O#> 
+        ];
+    :created              2017-07-22;
+    :category             <http://dbpedia.org/resource/Category:Semantic_Web>, <http://dbpedia.org/resource/Category:Hypermedia> .
+    :license              <http://dev.perl.org/licenses/>;
+    :support-forum        <irc://irc.perl.org/#perlrdf>, <irc://irc.freenode.net/#swig> ;
+    :maintainer           cpan:KJETILK;
+    :developer            cpan:KJETILK.
+    
 <http://dev.perl.org/licenses/>
-	dc:title  "the same terms as the perl 5 programming language system itself".
+    dc:title  "the same terms as the perl 5 programming language system itself".
 
