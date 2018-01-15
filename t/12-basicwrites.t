@@ -139,6 +139,8 @@ subtest "Get controlurl with testuser" => sub {
 								iri($exprefix . 'for'),
 								iri($base_uri . '/foo/data')),
 				  'Write instructions are OK');
+		has_predicate($exprefix . 'httpMethod', $retmodel, 'httpMethod predicate in content');
+
 };
 
 done_testing;

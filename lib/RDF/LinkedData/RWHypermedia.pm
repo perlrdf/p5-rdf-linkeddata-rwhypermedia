@@ -7,7 +7,7 @@ use warnings;
 
 use Moo;
 use Types::Standard qw(Str);
-use RDF::Trine qw(iri statement literal);
+use RDF::Trine qw(iri statement literal blank);
 use RDF::Trine::Parser;
 use Try::Tiny;
 use Data::Dumper;
@@ -253,6 +253,7 @@ around '_content' => sub {
 			$self->add_namespace_mapping(hydra => 'http://www.w3.org/ns/hydra/core#');
 			
 			my $hm = $self->namespaces->hm;
+			my $rdfs = $self->namespaces->rdfs;
 			
 			if ($self->is_logged_in) { # Credentials should already have been checked
 			  $self->log->debug('Logged in as: ' . $self->user);
@@ -262,7 +263,7 @@ around '_content' => sub {
 															iri($self->namespaces->rdf->type),
 															iri($hm->AffordancesDocument)));
 			  $rwmodel->add_statement(statement($controls_iri,
-															iri($self->namespaces->rdfs->comment),
+															iri($rdfs->comment),
 															literal('This document describes what you can do in terms of write operations on ' . $data_iri->uri_value, 'en')));
 			  $rwmodel->add_statement(statement($controls_iri,
 															iri($hm->for),
@@ -276,6 +277,41 @@ around '_content' => sub {
 			  $rwmodel->add_statement(statement($data_iri,
 															iri($hm->canBe),
 															iri($hm->deleted)));
+
+			  # Add more definitions of state change operations
+			  $rwmodel->add_statement(statement(iri($hm->deleted),
+															iri($rdfs->comment),
+															literal('Delete the resource description with the subject URI.', 'en'))
+														  );
+			  $rwmodel->add_statement(statement(iri($hm->deleted),
+															iri($hm->httpMethod),
+															literal('DELETE')));
+
+			  $rwmodel->add_statement(statement(iri($hm->replaced),
+															iri($rdfs->comment),
+															literal('Replace the resource description with the subject URI with the RDF given in the body of the message.', 'en'))
+														  );
+			  $rwmodel->add_statement(statement(iri($hm->replaced),
+															iri($hm->httpMethod),
+															literal('PUT')));
+
+			  $rwmodel->add_statement(statement(iri($hm->mergedInto),
+															iri($rdfs->comment),
+															literal('Perform an RDF merge of payload into resource', 'en'))
+														  );
+			  $rwmodel->add_statement(statement(iri($hm->mergedInto),
+															iri($hm->httpMethod),
+															literal('POST')));
+			  $rwmodel->add_statement(statement(iri($hm->mergedInto),
+															iri($rdfs->seeAlso),
+															blank('rdfmerge')));
+			  $rwmodel->add_statement(statement(blank('rdfmerge'),
+															iri($rdfs->label),
+															literal('RDF Merge')));
+			  $rwmodel->add_statement(statement(blank('rdfmerge'),
+															iri($rdfs->isDefinedBy),
+															iri('http://www.w3.org/TR/rdf-mt/#graphdefs')));
+
 
 			  my ($ctype, $s) = RDF::Trine::Serializer->negotiate('request_headers' => $headers_in,
 																					base => $self->base_uri,
