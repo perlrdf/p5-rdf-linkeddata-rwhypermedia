@@ -12,3 +12,6 @@
 	issued  2017-01-12;
 	label   "Fix typo in docs".
 
+`RDF-LinkedData-RWHypermedia 0.001_04 cpan:KJETILK`
+	issued  2017-01-15;
+	label   "Add more control statements".
