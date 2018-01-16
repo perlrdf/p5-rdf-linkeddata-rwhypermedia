@@ -6,7 +6,7 @@ use warnings;
 
 
 use Moo;
-use Types::Standard qw(Str);
+use Types::Standard qw(Str HashRef);
 use RDF::Trine qw(iri statement literal blank);
 use RDF::Trine::Parser;
 use Try::Tiny;
@@ -106,10 +106,14 @@ Indicates whether a user is logged in.
 
 A method that will add a triple to the data page for the given URI to the model building the hypermedia of the response.
 
-=item C<< credentials_ok >>, C<< unauthorized >>, C<< authenticator >>
+=item C<< credentials_ok >>, C<< unauthorized >>, C<< authenticator >>, C<< credentials >>
 
 Methods that deals with authentication and authorization. This part is
-really not stable, just for demo purposes at present.
+really not stable, just for demo purposes at present. The last is
+currently a hashref so that a configured username and password can be
+passed to the authenticator.
+
+
 
 =back
 
@@ -384,9 +388,12 @@ sub unauthorized {
   return $response;
 }
 
+has credentials => (is => 'ro', isa => HashRef);
+
 sub authenticator {
   my ($self, $user, $pass, $env) = @_;
-  return ($user eq 'testuser' && $pass eq 'sikrit');
+  my $cred = $self->credentials;
+  return ($user eq $cred->{username} && $pass eq $cred->{password});
 }
 
 
