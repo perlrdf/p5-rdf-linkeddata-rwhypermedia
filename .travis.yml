@@ -16,7 +16,6 @@ install:
   - cpan-install --toolchain
   - cpan-install --deps
   - cpan-install --coverage
-  - cpanm --notest KJETILK/RDF-LinkedData-1.90_02.tar.gz
 before_script:
   - coverage-setup
 script:
