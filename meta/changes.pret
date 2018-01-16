@@ -5,13 +5,17 @@
 	label   "Initial release".
 
 `RDF-LinkedData-RWHypermedia 0.001_02 cpan:KJETILK`
-	issued  2017-01-12;
+	issued  2018-01-12;
 	label   "Bugfix and document".
 
 `RDF-LinkedData-RWHypermedia 0.001_03 cpan:KJETILK`
-	issued  2017-01-12;
+	issued  2018-01-12;
 	label   "Fix typo in docs".
 
 `RDF-LinkedData-RWHypermedia 0.001_04 cpan:KJETILK`
-	issued  2017-01-15;
+	issued  2018-01-15;
 	label   "Add more control statements".
+
+`RDF-LinkedData-RWHypermedia 0.001_05 cpan:KJETILK`
+	issued  2018-01-16;
+	label   "Make credentials configurable".
