@@ -138,6 +138,20 @@ subtest 'Replace operations with authentication and wrong subject' => sub {
   my $model = check_content($mech);
 };
 
+subtest 'Write operations without authentication again' => sub {
+  my $body = '<' .$base_uri . 'bar/baz/bing> <http://example.org/error> "Credentials should be forgotten."@en .';
+  {
+	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+	 $mech->request(HTTP::Request->new('POST', "/bar/baz/bing/data", $head, $body));
+	 is($mech->status, 401, "Posting returns 401");
+  }
+  {
+	 my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
+	 $mech->request(HTTP::Request->new('PUT', "/bar/baz/bing/data", $head, $body));
+	 is($mech->status, 401, "Putting returns 401");
+  }
+};
+
 subtest 'Delete operation with authentication' => sub {
   my $mech = Test::WWW::Mechanize::PSGI->new(app => $tester);
   ok($mech->credentials('testuser', 'sikrit' ), 'Setting credentials (cannot really fail...)');
@@ -150,6 +164,7 @@ subtest 'Delete operation with authentication' => sub {
   $mech->get("/bar/baz/bing/control");
   is($mech->status, 404, "control returns 404");
 };
+
 
 
 sub check_content {
