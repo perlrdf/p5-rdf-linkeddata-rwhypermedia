@@ -47,6 +47,13 @@ To use it, please see the README of L<RDF::LinkedData>. To that configuration, a
     "class" : "RDF::LinkedData::RWHypermedia",
     "writes_enabled" : 1,
 
+and set a username and password, like this for now:
+
+ "credentials" : {
+	"username" : "testuser",
+	"password" : "sikrit" },
+
+
 Also, hypermedia is on by default, ensure that it isn't turned off.
 
 Then, start the server as you would with L<Plack::App::RDF::LinkedData>.
