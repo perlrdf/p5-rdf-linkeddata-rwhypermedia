@@ -23,3 +23,7 @@
 `RDF-LinkedData-RWHypermedia 0.001_06 cpan:KJETILK`
 	issued  2018-01-17;
 	label   "Log user out when no username is supplied".
+
+`RDF-LinkedData-RWHypermedia 0.002 cpan:KJETILK`
+	issued  2018-01-17;
+	label   "First non-dev release".
