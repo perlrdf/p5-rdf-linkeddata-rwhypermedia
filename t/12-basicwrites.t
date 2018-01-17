@@ -114,10 +114,9 @@ subtest "Get controlurl" => sub {
 };
 
 subtest "Get controlurl with testuser" => sub {
-	$ld->user('testuser');
 	$ld->type('controls');
 	$ld->does_read_operation(1);
-   $ld->request(Plack::Request->new({}));
+   $ld->request(Plack::Request->new({'REMOTE_USER'=>'testuser'}));
 	my $response = $ld->response($base_uri . '/foo');
 	isa_ok($response, 'Plack::Response');
 	is($response->status, 200, "Returns 200");
