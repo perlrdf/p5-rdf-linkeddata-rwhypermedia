@@ -7,12 +7,14 @@
     :test-requirement       [ :on "Test::RDF 1.21"^^:CpanId ];
     :test-requirement       [ :on "Test::WWW::Mechanize::PSGI"^^:CpanId ];
     :test-requirement       [ :on "HTTP::Request"^^:CpanId ];
+    :test-requirement       [ :on "Plack::Request"^^:CpanId ];
     :test-requirement       [ :on "Config::ZOMG"^^:CpanId ];
     :test-requirement       [ :on "FindBin"^^:CpanId ];
     :test-requirement       [ :on "Log::Any::Adapter"^^:CpanId ];
     :runtime-recommendation [ :on "Config::ZOMG"^^:CpanId ];
     :runtime-recommendation [ :on "Log::Any::Adapter"^^:CpanId ];
     :develop-recommendation [ :on "Log::Any::Adapter::Screen"^^:CpanId ];
+    :runtime-requirement    [ :on "perl 5.010001"^^:CpanId ];
     :runtime-requirement    [ :on "Moo"^^:CpanId ];
     :runtime-requirement    [ :on "RDF::LinkedData 1.90_02"^^:CpanId ];
     :runtime-requirement    [ :on "Try::Tiny"^^:CpanId ];
