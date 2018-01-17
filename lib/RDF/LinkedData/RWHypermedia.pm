@@ -102,6 +102,10 @@ Can be read or set to the username of the logged in user.
 
 Indicates whether a user is logged in.
 
+=item C<< log_out >> 
+
+Log out user.
+
 =item C<< add_rw_pointer ($hypermedia_model, $uri) >>
 
 A method that will add a triple to the data page for the given URI to the model building the hypermedia of the response.
@@ -132,7 +136,12 @@ around 'response' => sub {
 	 $self->user($req->user);
 	 $self->log->debug('Setting username: ' . $self->user);
   } else {
-	 $self->log->debug('No username supplied');
+	 if ($self->is_logged_in) {
+		$self->log->debug('Logging out ' . $self->user);
+		$self->log_out;
+	 } else {
+		$self->log->debug('No username supplied');
+	 }
   }
   
   my $node = $self->my_node($uri);
@@ -339,7 +348,9 @@ around '_content' => sub {
 
 
 has user => ( is => 'rw', isa => Str, lazy => 1, 
-				  predicate => 'is_logged_in');
+				  predicate => 'is_logged_in',
+				  clearer => 'log_out'
+				);
 
 
 sub add_rw_pointer {
