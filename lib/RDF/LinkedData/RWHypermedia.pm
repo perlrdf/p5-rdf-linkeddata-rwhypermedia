@@ -354,7 +354,7 @@ around '_content' => sub {
 };
 
 
-has user => ( is => 'rw', isa => Str, lazy => 1, 
+has user => ( is => 'rw', isa => Str,
 				  predicate => 'is_logged_in',
 				  clearer => 'log_out'
 				);
